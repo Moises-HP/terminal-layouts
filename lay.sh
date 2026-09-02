@@ -149,13 +149,7 @@ case "$sub" in
       else notepad "$(cygpath -w "$toml" 2>/dev/null || echo "$toml")" & fi
       echo "✏️  abriendo configs/$1.toml…"
     elif [ -f "$HERE/combo-$c.sh" ]; then
-      cur="$(sed -n 's#.*/open.sh" ##p' "$HERE/combo-$c.sh")"
-      echo "Combo '$c' abre: $cur"
-      printf "Nueva lista de layouts (Enter = dejar igual): [%s] " "$cur"
-      read -r nueva; nueva="${nueva:-$cur}"
-      # validar que cada layout exista
-      for l in $nueva; do [ -f "$CFG/$l.toml" ] || { echo "⛔ no existe el layout: $l  (lay ls)"; exit 1; }; done
-      sh "$HERE/savecombo.sh" "$c" $nueva >/dev/null && echo "✅ combo '$c' actualizado → $nueva"
+      exec sh "$HERE/editcombo.sh" "$c"
     else echo "⛔ no existe layout ni combo: $1  (lay ls)"; exit 1; fi ;;
 
   rename|mv)

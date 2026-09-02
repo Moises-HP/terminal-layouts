@@ -278,8 +278,15 @@ sh add.sh pos-deploys surveys-deploys tunnels   # ...o mételo a la ventana actu
 - `combo-<nombre>.sh/.cmd` = `open.sh <esos layouts>`.
 - Los combos **también salen** en el menú `lay` y en `lay ls`; ábrelos con
   `lay combo-<nombre>` (o directo `sh combo-<nombre>.sh`) y ánclalos con `lay pin combo-<nombre>`.
-- **Editar un combo:** `lay edit combo-<nombre>` — te muestra su lista actual (autoseteada) y
-  escribes la nueva (Enter = dejarla igual). Valida que los layouts existan.
+- **Editar un combo:** `lay edit combo-<nombre>` abre un **editor interactivo** que muestra
+  el combo numerado y lo modificas con acciones cortas (re-dibuja tras cada una):
+  ```text
+  +N / +nombre   agregar (N = nº de "Disponibles")
+  -N             quitar la posición N
+  m N M          mover la posición N a la posición M (reordenar)
+  ok             guardar y salir      ·   q   cancelar
+  ```
+  Valida que los layouts existan y no deja guardar un combo vacío.
 - **Borrar un combo:** `lay rm combo-<nombre>` (o `lay rm <nombre>` si es combo).
 - Ejemplo ya creado: **`combo-deploys`** (pos-deploys + surveys-deploys + tunnels).
 
@@ -458,6 +465,7 @@ Notas del formato:
 - `pick.sh` / `pick.cmd` — menú interactivo para **elegir cuáles** abrir juntos.
 - `add.sh` — agrega layout(s) como tab a la **ventana actual** (`open.sh -w last`).
 - `savecombo.sh` — guarda un conjunto → `combo-<nombre>.sh/.cmd`.
+- `editcombo.sh` — editor interactivo de combos (`lay edit combo-<n>`).
 - `wizard.sh` / `wizard.cmd` — asistente de rejilla (columnas×filas + carpeta/comando).
 - `cheatsheet.sh` / `cheatsheet.cmd` — referencia rápida de comandos (IAs + layouts).
 - `ai-aliases.sh` — comando `lay` + atajos IA (`cr`, `csp`…) + carga la integración de shell. Se auto-localiza.
