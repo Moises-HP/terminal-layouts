@@ -502,17 +502,26 @@ tu compañero tiene esos repos en `~/Documents/GitHub/…`. Con `lay doctor` ve 
 carpetas que faltan; puede borrarlos (`lay rm`) o crear los suyos (`lay wiz`/`lay grid`).
 El **sistema** (`lay`, atajos, tema, marcas) funciona igual para todos.
 
-## Anclar a la barra de tareas
+## Anclar a la barra de tareas / accesos en el Escritorio
 
-**Para qué sirve:** abrir un layout con un clic desde el menú Inicio o la barra.
-Windows no deja anclar a la barra por script, así que creamos un acceso en Inicio
-listo para anclar:
+`lay pin` crea accesos directos (**"Layout &lt;n&gt;"** o **"Combo &lt;n&gt;"**) que apuntan a
+`bash.exe` — por eso Windows **sí** te deja anclarlos a la barra (con un `.cmd` no se puede).
+
 ```bash
-lay pin pos-deploys claude-github    # crea accesos en  Inicio › Terminal Layouts
+lay pin                    # menú: elige cuáles y DÓNDE (Escritorio / solo Inicio / ambos)
+lay pin all                # TODOS los layouts (solo en Inicio, sin saturar el Escritorio)
+lay pin dev pos-deploys    # esos (en Escritorio + Inicio)
+lay pin --start dev        # solo Inicio  ·  --desktop = solo Escritorio  ·  --both = ambos
+lay pin combo-deploys      # un COMBO: un acceso que levanta TODO el combo de un clic ⭐
 ```
-Cada acceso se llama **"Layout <nombre>"**. Para anclarlo:
-1. Tecla **⊞ Windows** y escribe **`Layout`** → aparecen todos (ej. *Layout pos-deploys*).
-2. **Clic derecho** en el que quieras → **"Anclar a la barra de tareas"** (o "Anclar a Inicio").
+
+- **Menú Inicio**: ⊞ Windows → escribe **`Layout`** (o **`Combo`**) → salen todos.
+- **Escritorio**: doble clic en "Layout &lt;n&gt;" / "Combo &lt;n&gt;".
+- **Anclar a la barra**: clic derecho en el acceso → en Windows 11 **"Mostrar más opciones"**
+  → **"Anclar a la barra de tareas"** (o arrastra el acceso del Escritorio a la barra).
+
+> Un **combo** anclado abre varios layouts como tabs de una ventana → con un clic levantas
+> **todo** tu entorno. Crea combos con `lay combo <nombre> <a> <b> …` y ánclalos con `lay pin`.
 
 ## Windows Terminal
 

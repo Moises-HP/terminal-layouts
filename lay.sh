@@ -35,7 +35,8 @@ ${B}Respaldo / integración / instalación${R}
   ${G}lay export [archivo]${R}     empaquetar tus layouts (.tgz) para respaldo/otra PC
   ${G}lay import <archivo>${R}     restaurar layouts desde un respaldo
   ${G}lay bundle [archivo]${R}     empaquetar TODO (para dárselo a un compañero)
-  ${G}lay pin <a> ...${R}          crear acceso(s) en Inicio (para anclar a la barra de tareas)
+  ${G}lay pin${R} ${D}[all | <a>… | combo-x]${R}  accesos en Escritorio/Inicio para anclar a la barra
+                           ${D}(sin args = menú; elige cuáles y dónde. También combos.)${R}
   ${G}lay setup${R}                (re)configurar Windows Terminal (perfiles + atajos + tema)
 
 ${B}Ayuda / diagnóstico${R}
