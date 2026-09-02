@@ -31,7 +31,10 @@ para todo— sobre Windows Terminal.
 
 Requisitos: **Git Bash**, **Node.js** y **Windows Terminal**.
 
-1. Clona/descarga el repo en `~/Documents/GitHub/Proyectos/terminal-layouts`.
+1. Clónalo (en Git Bash):
+   ```bash
+   git clone https://github.com/Moises-HP/terminal-layouts.git ~/Documents/GitHub/Proyectos/terminal-layouts
+   ```
 2. **Doble clic en `install.cmd`** *(o `sh install.sh`)*.
 3. Abre una terminal nueva y prueba: `lay -h`.
 
