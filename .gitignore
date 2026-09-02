@@ -28,6 +28,8 @@ configs/*.toml
 !grid.sh
 !doctor.sh
 !backup.sh
+!savecombo.sh
+!editcombo.sh
 !pin.sh
 !cheatsheet.sh
 !ai-aliases.sh
