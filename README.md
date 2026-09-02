@@ -530,6 +530,30 @@ lay pin combo-deploys      # un COMBO: un acceso que levanta TODO el combo de un
 > Un **combo** anclado abre varios layouts como tabs de una ventana → con un clic levantas
 > **todo** tu entorno. Crea combos con `lay combo <nombre> <a> <b> …` y ánclalos con `lay pin`.
 
+## Apertura por etapas (evita el error `0x80070057`)
+
+Windows Terminal a veces falla al crear **muchos paneles de golpe** con
+`error 0x80070057 al iniciar bash.exe` (una carrera interna de ConPTY). Para evitarlo,
+`open.sh` **no** abre todo en un disparo: manda varias llamadas a `wt.exe` a la misma
+ventana, con una micro‑pausa. Modos (variable `LAY_STAGE`):
+
+| `LAY_STAGE` | Qué hace | Velocidad |
+|---|---|---|
+| `auto` (por defecto) | Layouts chicos = 1 llamada (instantáneo). Layouts **densos** (más de `LAY_STAGE_MAX`=4 paneles) = **un panel por llamada** (a prueba de fallos). Varios layouts = un tab a la vez. | rápido |
+| `pane` | Siempre un panel por llamada. Úsalo si algo **aún** falla. | lento pero infalible |
+| `tab` | Un tab por llamada (no separa paneles dentro de un tab). | medio |
+| `none` | Todo en un disparo (comportamiento viejo). | máximo, pero puede fallar |
+
+Ejemplos (rara vez los necesitas — `auto` ya cubre casi todo):
+```bash
+LAY_STAGE=pane lay surveys-deploys     # blindaje total para un layout muy denso
+LAY_STAGE=none lay dev                  # abrir de un jalón
+LAY_STAGE_MAX=2 lay all                 # ser más agresivo (stage a partir de 3 paneles)
+```
+
+> Si un layout apunta a una **carpeta inexistente**, ese panel también da `0x80070057`.
+> Revisa con `lay doctor` (te avisa cuáles faltan).
+
 ## Windows Terminal
 
 Se añadió el perfil **Git Bash** (abre en `%USERPROFILE%`) como **perfil por
