@@ -15,12 +15,12 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 export LAY_ICON='C:\Program Files\Git\mingw64\share\git\git-for-windows.ico'
 export LAY_START="$(cygpath -w "$APPDATA")\\Microsoft\\Windows\\Start Menu\\Programs\\Terminal Layouts"
 export LAY_DIR="$(cygpath -w "$HERE")"
+export LAY_BASH='C:\Program Files\Git\bin\bash.exe'      # target .exe → sí se puede anclar a la barra
+export LAY_OPEN="$(cygpath -m "$HERE/open.sh")"          # C:/.../open.sh (bash lo entiende)
 PS1FILE="$(cygpath -w "$HERE/_mklink.ps1")"
 
 for name in "$@"; do
   [ -f "$HERE/configs/$name.toml" ] || { echo "⚠️  no existe el layout: $name (saltado)"; continue; }
-  [ -f "$HERE/$name.cmd" ] || sh "$HERE/new.sh" "$name" >/dev/null
-  export LAY_CMD="$(cygpath -w "$HERE/$name.cmd")"
   export LAY_NAME="$name"
   # Crea "Layout <name>.lnk" en Inicio Y en el Escritorio (vía _mklink.ps1).
   powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PS1FILE" || { echo "⚠️  no se pudo crear el acceso de $name"; continue; }
