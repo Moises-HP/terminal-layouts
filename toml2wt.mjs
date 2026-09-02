@@ -68,6 +68,17 @@ function expandDir(d) {
   if (!d) return HOME;
   return d.startsWith('~') ? HOME + d.slice(1) : d;
 }
+// shell del panel: 'bash' | 'pwsh' (PowerShell 7) | 'powershell' (5.1) | 'cmd'.
+// Toma pane.shell, si no el default global LAY_SHELL, si no 'bash'.
+function shellOf(p) {
+  let s = String(p.shell || process.env.LAY_SHELL || 'bash').toLowerCase();
+  if (['git-bash','gitbash','sh','bash.exe'].includes(s)) s = 'bash';
+  else if (['pwsh.exe','powershell-core','ps7','core'].includes(s)) s = 'pwsh';
+  else if (['ps','powershell.exe','windows-powershell','winps'].includes(s)) s = 'powershell';
+  else if (['cmd.exe','bat','batch','command'].includes(s)) s = 'cmd';
+  if (!['bash','pwsh','powershell','cmd'].includes(s)) s = 'bash';
+  return s;
+}
 function buildTree(panes) {
   const byId = new Map(panes.map(p => [p.id, p]));
   const childIds = new Set();
@@ -76,10 +87,9 @@ function buildTree(panes) {
   const toNode = (p) => {
     const kids = (p.children || []).map(id => byId.get(id)).filter(Boolean);
     if (kids.length) return { split: p.split || 'vertical', children: kids.map(toNode) };
-    const cmds = p.commands || [];
     const dir = expandDir(p.directory);
     if (dir && !existsSync(dir)) MISSING.push(dir);   // aviso: carpeta inexistente
-    return { leaf: true, dir, cmd: cmds.length ? cmds.join(' && ') : '' };
+    return { leaf: true, dir, cmds: p.commands || [], shell: shellOf(p) };
   };
 
   // raíz = pane no referenciado como hijo; si hay varios, el que tenga children
@@ -99,10 +109,29 @@ const size = (num, den) => (num / den).toFixed(3);
 
 function createLeaf(leaf) {                 // args comunes de creación de un panel
   // Cada panel lleva el título del layout → el tab lo muestra fijo (con
-  // suppressApplicationTitle del perfil 'Layouts'), sin importar qué panel enfoques.
+  // suppressApplicationTitle del perfil 'Layouts'). El perfil da tema/título;
+  // el commandline (override) elige el SHELL del panel y ejecuta sus 'commands'
+  // dejando la terminal abierta (run-keep en bash, -NoExit en PS, /k en cmd).
   push('--title', LAYOUT_TITLE);
   push('-p', PROFILE, '-d', leaf.dir);
-  if (leaf.cmd) push(GB, '-l', RUNKEEP, leaf.cmd);
+  const cmds = leaf.cmds || [];
+  switch (leaf.shell) {
+    case 'pwsh':
+    case 'powershell': {
+      const exe = leaf.shell === 'pwsh' ? 'pwsh.exe' : 'powershell.exe';
+      const join = leaf.shell === 'pwsh' ? ' && ' : '; ';   // PS 5.1 no soporta &&
+      if (cmds.length) push(exe, '-NoExit', '-Command', cmds.join(join));
+      else push(exe, '-NoLogo');
+      break;
+    }
+    case 'cmd':
+      if (cmds.length) push('cmd.exe', '/k', cmds.join(' && '));
+      else push('cmd.exe');
+      break;
+    default: // bash
+      if (cmds.length) push(GB, '-l', RUNKEEP, cmds.join(' && '));
+      // sin comando: hereda el commandline del perfil (Git Bash)
+  }
 }
 
 // emit(node): asume que el panel enfocado es firstLeaf(node) ocupando toda la
@@ -141,7 +170,7 @@ function leafBlock(leaf) {
   return [
     '┌' + '─'.repeat(inner) + '┐',
     l(trunc(name, inner - 1)),
-    l(leaf.cmd ? '▸ ' + trunc(leaf.cmd, inner - 3) : ''),
+    l((leaf.cmds && leaf.cmds.length) ? '▸ ' + trunc(leaf.cmds.join(' && '), inner - 3) : ''),
     '└' + '─'.repeat(inner) + '┘',
   ];
 }

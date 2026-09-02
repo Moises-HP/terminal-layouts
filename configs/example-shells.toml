@@ -1,0 +1,32 @@
+# EJEMPLO — mezclar shells en un mismo layout (bash | PowerShell | CMD).
+# Cada panel abre en el shell que indique 'shell'. El comando 'lay' es el mismo
+# para todos; solo cambia en qué shell corre cada panel.
+name = "example-shells"
+title = "EJEMPLO · SHELLS"
+color = "orange"
+
+[[panes]]
+id = "root"
+split = "horizontal"          # 3 columnas
+children = ["a", "b", "c"]
+
+[[panes]]
+id = "a"
+type = "terminal"
+directory = "~"
+commands = ["echo panel Git Bash"]
+shell = "bash"
+
+[[panes]]
+id = "b"
+type = "terminal"
+directory = "~"
+commands = ["Write-Host 'panel PowerShell'"]
+shell = "powershell"          # Windows PowerShell 5.1 (siempre presente); usa 'pwsh' para PS7
+
+[[panes]]
+id = "c"
+type = "terminal"
+directory = "~"
+commands = ["echo panel CMD"]
+shell = "cmd"

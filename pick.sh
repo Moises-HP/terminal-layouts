@@ -37,8 +37,9 @@ for tok in $line; do case "$tok" in t|term|terminal) export MSYS_NO_PATHCONV=1; 
 sel=()
 for tok in $line; do
   case "$tok" in
-    ''|*[!0-9]*)                                   # no numérico → nombre
-      if [ -f "$CFG/$tok.toml" ]; then sel+=("$tok")
+    ''|*[!0-9]*)                                   # no numérico → nombre (layout o combo)
+      c="${tok#combo-}"
+      if [ -f "$CFG/$tok.toml" ] || [ -f "$HERE/combo-$c.sh" ]; then sel+=("$tok")
       else echo "⚠️  no existe: $tok"; fi ;;
     *)                                             # numérico → índice
       idx=$((tok-1))

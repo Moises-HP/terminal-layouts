@@ -390,6 +390,9 @@ directory = "~/Documents/GitHub/mi-proyecto"
 commands = ["npm i", "npm run dev"]   # opcional; se unen con && ; el panel queda abierto
 ```
 
+Ejemplos incluidos en `configs/`: `example-single`, `example-columns`, `example-grid-2x2`,
+`example-shells` (mezcla bash/PowerShell/CMD).
+
 Rejillas — se arman con contenedores (`split` + `children`) que apuntan a otros
 paneles por `id`. **La raíz es el pane que nadie referencia en `children`.**
 
@@ -429,7 +432,11 @@ Regla de dirección (verificada con los configs reales de Warp):
 
 Notas del formato:
 - `directory`: `~` = tu carpeta de usuario (`%USERPROFILE%`). También acepta rutas `C:/...`.
-- `commands`: lista; se ejecutan con `&&` en orden. Sin `commands` → solo abre el shell en la carpeta.
+- `commands`: lista; se ejecutan en orden. Sin `commands` → solo abre el shell en la carpeta.
+- `shell`: **el shell del panel** — `bash` (por defecto), `pwsh` (PowerShell 7),
+  `powershell` (Windows PowerShell 5.1) o `cmd`. Puedes mezclar shells en un mismo layout.
+  El comando `lay` y todo el sistema siguen igual; solo cambia en qué shell corre el panel.
+  Para cambiar el shell por defecto de TODOS los paneles: `lay shell pwsh|powershell|cmd|bash`.
 - Paneles **huérfanos** (definidos pero fuera del árbol de `children`) se ignoran, igual que en Warp.
 - Anidación arbitraria soportada (columnas dentro de filas dentro de columnas…).
 
@@ -529,6 +536,28 @@ lay pin combo-deploys      # un COMBO: un acceso que levanta TODO el combo de un
 
 > Un **combo** anclado abre varios layouts como tabs de una ventana → con un clic levantas
 > **todo** tu entorno. Crea combos con `lay combo <nombre> <a> <b> …` y ánclalos con `lay pin`.
+
+## Shell de los paneles (bash / PowerShell / CMD)
+
+Cada quien usa el shell que prefiera. El **comando `lay` y todo el sistema son iguales**
+para todos (por debajo lo maneja Git Bash, invisible); lo que cambia es **en qué shell
+abre cada panel**.
+
+- **Por panel**, en el `.toml`:
+  ```toml
+  [[panes]]
+  id = "srv"
+  directory = "~/mi-proyecto"
+  commands = ["npm run dev"]
+  shell = "pwsh"        # bash (def.) · pwsh (PowerShell 7) · powershell (5.1) · cmd
+  ```
+- **Por defecto para todos los paneles** (si no ponen `shell` propio):
+  ```bash
+  lay shell pwsh        # o powershell / cmd / bash   ·   lay shell  = ver el actual
+  ```
+
+Los `commands` corren en ese shell y la terminal **queda abierta** (bash: `run-keep`;
+PowerShell: `-NoExit`; cmd: `/k`). Puedes **mezclar** shells en un mismo layout.
 
 ## Apertura por etapas (evita el error `0x80070057`)
 

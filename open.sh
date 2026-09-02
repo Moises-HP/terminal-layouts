@@ -13,6 +13,9 @@ export MSYS_NO_PATHCONV=1
 # (pwd normal da /c/... y node lo resuelve mal como C:\c\...)
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -W)"
 CFG="$HERE/configs"
+# default global de shell para los paneles (LAY_SHELL), configurable con 'lay shell'.
+[ -f "$HERE/.layconfig" ] && . "$HERE/.layconfig" || true
+export LAY_SHELL="${LAY_SHELL:-bash}"
 
 # Orden preferido para la vista MEGA; los .toml nuevos no listados se agregan al final.
 # Orden preferido para la vista MEGA (lay all). Pon aquí los nombres que quieras

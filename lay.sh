@@ -4,6 +4,13 @@
 HERE="$(cd "$(dirname "$0")" && pwd -W)"   # ruta Windows (C:/...) para que node la lea bien
 CFG="$HERE/configs"
 
+# upsert de una clave en .layconfig (preferencias locales: LAY_BLOCKS, LAY_SHELL…)
+set_cfg() {
+  local k="$1" v="$2" f="$HERE/.layconfig"
+  touch "$f"
+  { grep -v "^$k=" "$f" 2>/dev/null || true; echo "$k=$v"; } > "$f.tmp" && mv "$f.tmp" "$f"
+}
+
 help() {
   B=$'\e[1m'; C=$'\e[36m'; G=$'\e[32m'; D=$'\e[2m'; R=$'\e[0m'
   cat <<EOF
@@ -42,6 +49,7 @@ ${B}Respaldo / integración / instalación${R}
 ${B}Ayuda / diagnóstico${R}
   ${G}lay doctor${R} ${D}[--fix]${R}         revisar salud (carpetas, conversión, atajos); --fix regenera atajos
   ${G}lay blocks${R} ${D}off|compact|full${R}  indicador visual por comando (✓/✗); por defecto compact
+  ${G}lay shell${R} ${D}bash|pwsh|powershell|cmd${R}  shell por defecto de los paneles
   ${G}lay cheat${R}                cheatsheet (comandos de IAs + layouts)
   ${G}lay -h${R} / ${G}lay help${R}          esta ayuda
 
@@ -72,7 +80,7 @@ case "$sub" in
   blocks|ui)
     shift; cfg="$HERE/.layconfig"
     case "${1:-show}" in
-      off|compact|full) printf 'LAY_BLOCKS=%s\n' "$1" > "$cfg"
+      off|compact|full) set_cfg LAY_BLOCKS "$1"
         echo "✓ Indicador por comando: $1  (efectivo en terminales NUEVAS; en esta ahora: source ~/.bashrc)" ;;
       show) cur=compact; [ -f "$cfg" ] && cur="$(sed -n 's/^LAY_BLOCKS=//p' "$cfg")"
         echo "Indicador por comando: ${cur:-compact}"
@@ -81,6 +89,22 @@ case "$sub" in
         echo "  full    = divisor + ✓/✗ + último comando + hora"
         echo "Cambiar:  lay blocks off | compact | full" ;;
       *) echo "uso: lay blocks off | compact | full" ;;
+    esac ;;
+
+  shell)
+    shift; cfg="$HERE/.layconfig"
+    case "${1:-show}" in
+      bash|pwsh|powershell|cmd) set_cfg LAY_SHELL "$1"
+        echo "✓ Shell por defecto de los paneles: $1"
+        echo "  (afecta paneles sin 'shell' propio en su .toml; por-panel el .toml manda)" ;;
+      show) cur=bash; [ -f "$cfg" ] && cur="$(sed -n 's/^LAY_SHELL=//p' "$cfg")"
+        echo "Shell por defecto de los paneles: ${cur:-bash}"
+        echo "  bash        = Git Bash (por defecto)"
+        echo "  pwsh        = PowerShell 7   ·   powershell = Windows PowerShell 5.1"
+        echo "  cmd         = Símbolo del sistema"
+        echo "En un .toml, por panel:  shell = \"pwsh\"   (o cmd, powershell, bash)"
+        echo "Cambiar el default:  lay shell bash | pwsh | powershell | cmd" ;;
+      *) echo "uso: lay shell bash | pwsh | powershell | cmd" ;;
     esac ;;
   term|terminal)  export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash" ;;
   all)            exec sh "$HERE/open.sh" ;;
