@@ -82,8 +82,14 @@ case "$sub" in
         dir="$(grep -m1 '^directory' "$f" | sed 's/.*=[ ]*"//; s/".*//; s#/*$##; s#.*/##')"
         printf "%-27s %-8s %-7s %s\n" "$n" "${color:-—}" "$panes" "${dir:-—}"
       done
+      for f in "$HERE"/combo-*.sh; do
+        [ -e "$f" ] || continue; c="$(basename "$f" .sh | sed 's/^combo-//')"
+        lays="$(sed -n 's#.*/open.sh" ##p' "$f")"
+        printf "%-27s %-8s %-7s %s\n" "combo-$c" "combo" "—" "= $lays"
+      done
     else
       ls -1 "$CFG"/*.toml 2>/dev/null | sed 's#.*/##; s#\.toml$##'
+      for f in "$HERE"/combo-*.sh; do [ -e "$f" ] && echo "combo-$(basename "$f" .sh | sed 's/^combo-//')"; done
     fi ;;
 
   preview|show)

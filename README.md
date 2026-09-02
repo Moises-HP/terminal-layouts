@@ -217,7 +217,7 @@ Configurados en Windows Terminal (settings.json):
 Nota: **Ctrl+Shift+T** duplica el tab actual (hereda su carpeta) → una terminal nueva
 justo donde estabas, en vez de abrir en `~`.
 
-## Ayudas visuales: panel activo, marcas de comandos y errores
+## Ayudas visuales: panel activo, bloques de comando y errores
 
 Tres ayudas que quedan configuradas con `lay setup` (o `install.sh`):
 
@@ -229,17 +229,26 @@ escribiendo. (Es `unfocusedAppearance` del perfil de WT.)
 **marca** en la barra de scroll (derecha). Ubica dónde empezó cada comando aunque haya
 escupido mucho texto. Saltar al comando anterior/siguiente: **Ctrl+Shift+↑ / Ctrl+Shift+↓**.
 
-**3) Errores en rojo.** Con la *integración de shell* (`shell-integration.sh`), si un
-comando **falla** (exit code ≠ 0) su marca se pinta **de rojo**. Si un `docker compose up`
-o un `sh deploy.sh` truena, lo ves sin leer todo el output.
+**3) Errores en rojo (marcas).** Con la *integración de shell* (`shell-integration.sh`),
+la marca de un comando que **falla** (exit ≠ 0) se pinta **roja** en la barra de scroll.
 
-> Nota honesta: Windows Terminal **no** tiene el "bloque sticky" de Warp (el comando
-> pegado arriba mientras haces scroll) — eso no existe nativo en WT. Lo de arriba
-> (marcas + saltar entre comandos + rojo si falló) es el **equivalente nativo** para
-> saber qué comando produjo qué output, y cuáles fallaron.
+**4) Bloque por comando (estilo Warp).** Antes de cada prompt se dibuja una **línea
+divisoria** + el **✓/✗ del último comando**, su **texto** y la hora. Así, sin subir en la
+terminal, ves qué corriste y si funcionó; y al hacer scroll cada comando queda separado
+por su divisor:
+```text
+──────────────────────────────────────────
+✓ docker compose up -d · 15:36
+usuario@pc ~/proyecto $
+```
+Desactivar solo el bloque: `export LAY_NO_BLOCKS=1` (antes de abrir la terminal).
 
-Se activan al abrir una terminal **nueva** (la integración de shell se carga desde
-`~/.bashrc`). Si ya tienes una abierta: `source ~/.bashrc`.
+> Nota honesta: WT no tiene el "bloque sticky" de Warp (el comando pegado arriba mientras
+> haces scroll) — no existe nativo. Esto (marcas + rojo si falló + bloque con ✓/✗ y el
+> último comando) es el equivalente para ubicar qué comando produjo qué.
+
+Se activan al abrir una terminal **nueva** (se cargan desde `~/.bashrc`). Si ya tienes una
+abierta: `source ~/.bashrc`.
 
 Sobre **arrastrar**: en Windows Terminal se **arrastran los TABS** (reordenar, o
 sacarlos a otra ventana). Los **paneles** no se arrastran con el mouse como en Warp;
@@ -271,6 +280,8 @@ sh add.sh pos-deploys surveys-deploys tunnels   # ...o mételo a la ventana actu
 ```
 
 - `combo-<nombre>.sh/.cmd` = `open.sh <esos layouts>`.
+- Los combos **también salen** en el menú `lay` y en `lay ls`; ábrelos con
+  `lay combo-<nombre>` (o directo `sh combo-<nombre>.sh`) y ánclalos con `lay pin combo-<nombre>`.
 - Para borrar un combo, borra sus 2 archivos `combo-<nombre>.*`.
 - Ejemplo ya creado: **`combo-deploys`** (pos-deploys + surveys-deploys + tunnels).
 

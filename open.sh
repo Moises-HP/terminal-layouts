@@ -39,6 +39,18 @@ if [ ${#names[@]} -eq 0 ] || { [ ${#names[@]} -eq 1 ] && [ "${names[0]}" = "all"
   done
 fi
 
+# expandir combos: si un nombre es un combo (combo-<n>.sh), se reemplaza por sus layouts
+exp=()
+for n in "${names[@]}"; do
+  b="${n#combo-}"
+  if [ -f "$CFG/$n.toml" ]; then exp+=("$n")
+  elif [ -f "$HERE/combo-$b.sh" ]; then
+    while IFS= read -r l; do [ -n "$l" ] && exp+=("$l"); done \
+      < <(sed -n 's#.*/open.sh" ##p' "$HERE/combo-$b.sh" | tr ' ' '\n')
+  else exp+=("$n"); fi
+done
+names=("${exp[@]}")
+
 # recordar lo último abierto (para 'lay last')
 [ ${#names[@]} -gt 0 ] && printf '%s\n' "${names[*]}" > "$HERE/.last" 2>/dev/null || true
 

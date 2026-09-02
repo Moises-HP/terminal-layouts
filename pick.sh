@@ -9,11 +9,17 @@ CFG="$HERE/configs"
 
 names=()
 for f in "$CFG"/*.toml; do [ -e "$f" ] || continue; names+=("$(basename "$f" .toml)"); done
+nlayouts=${#names[@]}
+for f in "$HERE"/combo-*.sh; do [ -e "$f" ] || continue; names+=("combo-$(basename "$f" .sh | sed 's/^combo-//')"); done
 [ ${#names[@]} -gt 0 ] || { echo "No hay configs en $CFG"; exit 1; }
 
-echo "Layouts disponibles:"
+echo "Layouts y combos disponibles:"
 i=0
-for n in "${names[@]}"; do i=$((i+1)); printf "  %2d) %s\n" "$i" "$n"; done
+for n in "${names[@]}"; do
+  i=$((i+1))
+  [ "$i" -eq "$((nlayouts+1))" ] && echo "  — combos (levantan varios layouts) —"
+  printf "  %2d) %s\n" "$i" "$n"
+done
 echo   "   t) terminal normal (Git Bash, sin layout)"
 echo
 echo "Escribe cuáles abrir (números o nombres, separados por espacio)."
