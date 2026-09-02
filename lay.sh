@@ -31,7 +31,7 @@ ${B}Crear / administrar${R}
   ${G}lay wiz${R}                  asistente de rejilla (columnas x filas + carpeta/comando)
   ${G}lay grid <n> CxR <celda...>${R}  crear rejilla en 1 línea (celda = carpeta o carpeta|comando)
   ${G}lay preview <nombre>${R}     ver la rejilla en ASCII (sin abrir nada)
-  ${G}lay edit <nombre>${R}        abrir el .toml en el editor (VS Code o Notepad)
+  ${G}lay edit <nombre>${R}        editar: layout → abre el .toml; combo → cambia su lista de layouts
   ${G}lay dup <origen> <nuevo>${R} duplicar un layout
   ${G}lay rename <viejo> <nuevo>${R}  renombrar un layout (+ sus atajos)
   ${G}lay rm <nombre>${R}          borrar un layout O un combo (combo-<n>) + sus atajos
@@ -142,11 +142,21 @@ case "$sub" in
     echo "📄 '$1' → '$2' (copiado + atajos). Ajusta el título con: lay edit $2" ;;
 
   edit)
-    shift; need_name "${1:-}"; exists "$1"
-    toml="$CFG/$1.toml"
-    if command -v code >/dev/null 2>&1; then code "$toml"
-    else notepad "$(cygpath -w "$toml" 2>/dev/null || echo "$toml")" & fi
-    echo "✏️  abriendo configs/$1.toml…" ;;
+    shift; need_name "${1:-}"; c="${1#combo-}"
+    if [ -f "$CFG/$1.toml" ]; then
+      toml="$CFG/$1.toml"
+      if command -v code >/dev/null 2>&1; then code "$toml"
+      else notepad "$(cygpath -w "$toml" 2>/dev/null || echo "$toml")" & fi
+      echo "✏️  abriendo configs/$1.toml…"
+    elif [ -f "$HERE/combo-$c.sh" ]; then
+      cur="$(sed -n 's#.*/open.sh" ##p' "$HERE/combo-$c.sh")"
+      echo "Combo '$c' abre: $cur"
+      printf "Nueva lista de layouts (Enter = dejar igual): [%s] " "$cur"
+      read -r nueva; nueva="${nueva:-$cur}"
+      # validar que cada layout exista
+      for l in $nueva; do [ -f "$CFG/$l.toml" ] || { echo "⛔ no existe el layout: $l  (lay ls)"; exit 1; }; done
+      sh "$HERE/savecombo.sh" "$c" $nueva >/dev/null && echo "✅ combo '$c' actualizado → $nueva"
+    else echo "⛔ no existe layout ni combo: $1  (lay ls)"; exit 1; fi ;;
 
   rename|mv)
     shift; need_name "${1:-}"; [ -n "${2:-}" ] || { echo "uso: lay rename <viejo> <nuevo>"; exit 1; }

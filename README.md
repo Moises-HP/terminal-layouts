@@ -278,6 +278,8 @@ sh add.sh pos-deploys surveys-deploys tunnels   # ...o mételo a la ventana actu
 - `combo-<nombre>.sh/.cmd` = `open.sh <esos layouts>`.
 - Los combos **también salen** en el menú `lay` y en `lay ls`; ábrelos con
   `lay combo-<nombre>` (o directo `sh combo-<nombre>.sh`) y ánclalos con `lay pin combo-<nombre>`.
+- **Editar un combo:** `lay edit combo-<nombre>` — te muestra su lista actual (autoseteada) y
+  escribes la nueva (Enter = dejarla igual). Valida que los layouts existan.
 - **Borrar un combo:** `lay rm combo-<nombre>` (o `lay rm <nombre>` si es combo).
 - Ejemplo ya creado: **`combo-deploys`** (pos-deploys + surveys-deploys + tunnels).
 
