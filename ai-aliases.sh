@@ -27,7 +27,7 @@ lay() { sh "$LAYOUTS_DIR/lay.sh" "$@"; }
 # Autocompletado con Tab: 'lay <TAB>' → subcomandos + layouts ; 'lay add <TAB>' → layouts
 _lay_complete() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
-  local subs="menu add all last term new wiz grid preview edit dup rename rm combo export import bundle pin setup ls doctor cheat help"
+  local subs="menu add all last term new wiz grid preview edit dup rename rm combo export import bundle pin setup ls doctor blocks cheat help"
   local layouts; layouts="$(ls -1 "$LAYOUTS_DIR/configs"/*.toml 2>/dev/null | sed 's#.*/##; s#\.toml$##')"
   if [ "$COMP_CWORD" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "$subs $layouts" -- "$cur") )

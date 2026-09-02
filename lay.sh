@@ -27,7 +27,7 @@ ${B}Crear / administrar${R}
   ${G}lay edit <nombre>${R}        abrir el .toml en el editor (VS Code o Notepad)
   ${G}lay dup <origen> <nuevo>${R} duplicar un layout
   ${G}lay rename <viejo> <nuevo>${R}  renombrar un layout (+ sus atajos)
-  ${G}lay rm <nombre>${R}          borrar un layout (.toml + atajos)
+  ${G}lay rm <nombre>${R}          borrar un layout O un combo (combo-<n>) + sus atajos
   ${G}lay combo <n> <a> <b>${R}    guardar un conjunto como combo-<n>
   ${G}lay ls${R} ${D}[-l]${R}              listar layouts (${D}-l${R} = tabla con color, #paneles y carpeta)
 
@@ -41,6 +41,7 @@ ${B}Respaldo / integración / instalación${R}
 
 ${B}Ayuda / diagnóstico${R}
   ${G}lay doctor${R} ${D}[--fix]${R}         revisar salud (carpetas, conversión, atajos); --fix regenera atajos
+  ${G}lay blocks${R} ${D}off|compact|full${R}  indicador visual por comando (✓/✗); por defecto compact
   ${G}lay cheat${R}                cheatsheet (comandos de IAs + layouts)
   ${G}lay -h${R} / ${G}lay help${R}          esta ayuda
 
@@ -68,6 +69,19 @@ case "$sub" in
   cheat)          exec sh "$HERE/cheatsheet.sh" ;;
   doctor|check)   shift; exec sh "$HERE/doctor.sh" "$@" ;;   # acepta --fix
   grid)           shift; exec sh "$HERE/grid.sh" "$@" ;;
+  blocks|ui)
+    shift; cfg="$HERE/.layconfig"
+    case "${1:-show}" in
+      off|compact|full) printf 'LAY_BLOCKS=%s\n' "$1" > "$cfg"
+        echo "✓ Indicador por comando: $1  (efectivo en terminales NUEVAS; en esta ahora: source ~/.bashrc)" ;;
+      show) cur=compact; [ -f "$cfg" ] && cur="$(sed -n 's/^LAY_BLOCKS=//p' "$cfg")"
+        echo "Indicador por comando: ${cur:-compact}"
+        echo "  off     = nada (solo marcas en la barra de scroll)"
+        echo "  compact = una línea chica: ── ✓ 15:36   (por defecto)"
+        echo "  full    = divisor + ✓/✗ + último comando + hora"
+        echo "Cambiar:  lay blocks off | compact | full" ;;
+      *) echo "uso: lay blocks off | compact | full" ;;
+    esac ;;
   term|terminal)  export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash" ;;
   all)            exec sh "$HERE/open.sh" ;;
   last)           [ -f "$HERE/.last" ] || { echo "Aún no hay 'último'. Abre algo primero."; exit 1; }
@@ -120,13 +134,14 @@ case "$sub" in
     echo "🔁 '$1' → '$2' (renombrado + atajos). Ajusta el 'title' con: lay edit $2" ;;
 
   rm|remove|del)
-    shift; need_name "${1:-}"; exists "$1"
-    printf "Borrar layout '%s' (configs/%s.toml + %s.sh/.cmd) [y/N]: " "$1" "$1" "$1"
-    read -r ans
-    case "$ans" in
-      y|Y|s|S) rm -f "$CFG/$1.toml" "$HERE/$1.sh" "$HERE/$1.cmd"; echo "🗑️  '$1' eliminado." ;;
-      *) echo "Cancelado." ;;
-    esac ;;
+    shift; need_name "${1:-}"; c="${1#combo-}"
+    if [ -f "$CFG/$1.toml" ]; then
+      printf "Borrar layout '%s' (.toml + atajos) [y/N]: " "$1"; read -r ans
+      case "$ans" in y|Y|s|S) rm -f "$CFG/$1.toml" "$HERE/$1.sh" "$HERE/$1.cmd"; echo "🗑️  layout '$1' eliminado." ;; *) echo "Cancelado." ;; esac
+    elif [ -f "$HERE/combo-$c.sh" ]; then
+      printf "Borrar combo '%s' [y/N]: " "$c"; read -r ans
+      case "$ans" in y|Y|s|S) rm -f "$HERE/combo-$c.sh" "$HERE/combo-$c.cmd"; echo "🗑️  combo '$c' eliminado." ;; *) echo "Cancelado." ;; esac
+    else echo "⛔ no existe layout ni combo: $1  (lay ls)"; exit 1; fi ;;
 
   *)  exec sh "$HERE/open.sh" "$@" ;;   # uno o varios nombres → abrir
 esac

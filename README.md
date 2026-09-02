@@ -232,16 +232,12 @@ escupido mucho texto. Saltar al comando anterior/siguiente: **Ctrl+Shift+↑ / C
 **3) Errores en rojo (marcas).** Con la *integración de shell* (`shell-integration.sh`),
 la marca de un comando que **falla** (exit ≠ 0) se pinta **roja** en la barra de scroll.
 
-**4) Bloque por comando (estilo Warp).** Antes de cada prompt se dibuja una **línea
-divisoria** + el **✓/✗ del último comando**, su **texto** y la hora. Así, sin subir en la
-terminal, ves qué corriste y si funcionó; y al hacer scroll cada comando queda separado
-por su divisor:
-```text
-──────────────────────────────────────────
-✓ docker compose up -d · 15:36
-usuario@pc ~/proyecto $
-```
-Desactivar solo el bloque: `export LAY_NO_BLOCKS=1` (antes de abrir la terminal).
+**4) Indicador por comando (✓/✗).** Antes de cada prompt ves si el último comando
+funcionó o falló. Configúralo con **`lay blocks off|compact|full`**:
+- **compact** (por defecto): una línea chica → `── ✓ 15:36` (`✗` roja si falló).
+- **full**: divisor de ancho completo + ✓/✗ + el **texto del último comando** + hora
+  (útil para ubicar qué comando produjo qué, estilo bloques de Warp).
+- **off**: nada (solo las marcas de la barra de scroll).
 
 > Nota honesta: WT no tiene el "bloque sticky" de Warp (el comando pegado arriba mientras
 > haces scroll) — no existe nativo. Esto (marcas + rojo si falló + bloque con ✓/✗ y el
@@ -282,7 +278,7 @@ sh add.sh pos-deploys surveys-deploys tunnels   # ...o mételo a la ventana actu
 - `combo-<nombre>.sh/.cmd` = `open.sh <esos layouts>`.
 - Los combos **también salen** en el menú `lay` y en `lay ls`; ábrelos con
   `lay combo-<nombre>` (o directo `sh combo-<nombre>.sh`) y ánclalos con `lay pin combo-<nombre>`.
-- Para borrar un combo, borra sus 2 archivos `combo-<nombre>.*`.
+- **Borrar un combo:** `lay rm combo-<nombre>` (o `lay rm <nombre>` si es combo).
 - Ejemplo ya creado: **`combo-deploys`** (pos-deploys + surveys-deploys + tunnels).
 
 ## Asistente para crear layouts (wizard)

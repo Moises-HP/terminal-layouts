@@ -4,8 +4,9 @@
 #  (Los atajos se regeneran solos con install.sh / lay doctor --fix.)
 # =========================================================================
 
-# estado, notas y respaldos locales
+# estado, notas, preferencias y respaldos locales
 .last
+.layconfig
 *.tgz
 *.txt
 layouts-backup*
