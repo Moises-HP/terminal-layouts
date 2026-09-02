@@ -1,0 +1,23 @@
+# EJEMPLO — 2 columnas (izquierda | derecha).
+#   split="horizontal" => columnas   ·   split="vertical" => filas
+name = "example-columns"
+title = "EJEMPLO · 2 COLUMNAS"
+color = "cyan"
+
+[[panes]]
+id = "root"
+split = "horizontal"        # izquierda | derecha
+children = ["left", "right"]
+
+[[panes]]
+id = "left"
+type = "terminal"
+directory = "~"
+shell = "bash"
+
+[[panes]]
+id = "right"
+type = "terminal"
+directory = "~"
+commands = ["echo panel derecho"]
+shell = "bash"

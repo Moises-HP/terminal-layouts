@@ -1,0 +1,12 @@
+# EJEMPLO — un solo panel. Copia este archivo y edítalo (o usa: lay new mi-layout).
+# 'directory' con ~ = tu carpeta de usuario. Sin 'commands' = solo abre el shell ahí.
+name = "example-single"
+title = "EJEMPLO · 1 PANEL"
+color = "green"
+
+[[panes]]
+id = "main"
+type = "terminal"
+directory = "~"
+# commands = ["echo hola desde el layout"]
+shell = "bash"

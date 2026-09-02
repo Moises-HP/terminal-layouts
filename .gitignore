@@ -1,0 +1,37 @@
+# =========================================================================
+#  Qué se sube al repo: SOLO el sistema (scripts + docs) y los ejemplos.
+#  Se quedan fuera: tus layouts personales, atajos generados, combos y estado.
+#  (Los atajos se regeneran solos con install.sh / lay doctor --fix.)
+# =========================================================================
+
+# estado, notas y respaldos locales
+.last
+*.tgz
+*.txt
+layouts-backup*
+
+# configs personales — se sube SOLO configs/example-*.toml
+configs/*.toml
+!configs/example-*.toml
+
+# atajos generados por layout (<layout>.sh/.cmd) y combos: se ignora todo .sh/.cmd
+# y se "des-ignora" únicamente el sistema.
+*.sh
+*.cmd
+!install.sh
+!open.sh
+!lay.sh
+!pick.sh
+!new.sh
+!wizard.sh
+!grid.sh
+!doctor.sh
+!backup.sh
+!pin.sh
+!cheatsheet.sh
+!ai-aliases.sh
+!shell-integration.sh
+!run-keep.sh
+!all.sh
+!install.cmd
+!all.cmd

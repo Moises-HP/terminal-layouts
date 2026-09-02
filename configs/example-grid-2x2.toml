@@ -1,0 +1,44 @@
+# EJEMPLO — rejilla 2x2 (2 columnas x 2 filas). Cada celda es un panel.
+# Tip: puedes generar rejillas así en 1 línea con:  lay grid mi-rejilla 2x2 ~ ~ ~ ~
+name = "example-grid-2x2"
+title = "EJEMPLO · 2x2"
+color = "purple"
+
+[[panes]]
+id = "root"
+split = "horizontal"        # 2 columnas
+children = ["colL", "colR"]
+
+[[panes]]
+id = "colL"
+split = "vertical"          # 2 filas
+children = ["a", "b"]
+
+[[panes]]
+id = "colR"
+split = "vertical"
+children = ["c", "d"]
+
+[[panes]]
+id = "a"
+type = "terminal"
+directory = "~"
+shell = "bash"
+
+[[panes]]
+id = "b"
+type = "terminal"
+directory = "~"
+shell = "bash"
+
+[[panes]]
+id = "c"
+type = "terminal"
+directory = "~"
+shell = "bash"
+
+[[panes]]
+id = "d"
+type = "terminal"
+directory = "~"
+shell = "bash"
