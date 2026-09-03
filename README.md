@@ -111,8 +111,9 @@ Dos formas:
 | `claude-pos-manager-repo` | CLAUDE · POS_REPO | 2 terminales (izq │ der) en `pos_manager_REPO` | `claude --resume` |
 | `claude-github` | CLAUDE · GITHUB | 2 terminales (izq │ der) en `~/Documents/GitHub` | `claude --resume` |
 
-Los paneles **quedan abiertos** aunque el comando termine (`run-keep.sh` hace
-`exec bash` al final).
+Los paneles con comando abren una **terminal interactiva normal** y corren ahí el comando
+(`run-keep.sh` → `run-keep-rc.sh`). Por eso **Ctrl+C detiene solo el comando y la terminal
+sigue viva** (no se cierra ni pide "reiniciar"); igual que teclearlo tú mismo.
 
 ## Colores y títulos de los tabs
 
@@ -131,7 +132,11 @@ vistazo (sobre todo en la vista MEGA):
 
 - **Cambiar color/título:** edita `color` / `title` en el `.toml` y **relanza** — no
   hay que regenerar `.sh`/`.cmd` (el color/título se leen del toml al abrir).
-- `color` acepta: `green magenta blue red yellow cyan orange purple` o un `#hex`.
+- `color` acepta: `green magenta blue red yellow cyan orange purple`, un `#hex`, o
+  **`random`** → el sistema le asigna un color de una paleta amplia, **estable por
+  layout** (mismo layout → siempre el mismo color; distintos layouts casi no repiten).
+- El color del tab se pone en **cada panel**, así el tab **queda coloreado siempre**
+  (antes se apagaba al enfocar un panel que no era el primero).
 - El título se queda **fijo** (no lo pisa el `cwd` de bash) gracias al perfil de WT
   **"Layouts"** (Git Bash + `suppressApplicationTitle`, oculto del menú). Tu perfil
   Git Bash normal no cambia (sigue mostrando el `cwd`).
@@ -233,11 +238,15 @@ escupido mucho texto. Saltar al comando anterior/siguiente: **Ctrl+Shift+↑ / C
 **3) Errores en rojo (marcas).** Con la *integración de shell* (`shell-integration.sh`),
 la marca de un comando que **falla** (exit ≠ 0) se pinta **roja** en la barra de scroll.
 
-**4) Indicador por comando (✓/✗).** Antes de cada prompt ves si el último comando
-funcionó o falló. Configúralo con **`lay blocks off|compact|full`**:
+**4) Indicador por comando (✓/✗).** Configúralo con **`lay blocks off|compact|full`**:
 - **compact** (por defecto): una línea chica → `── ✓ 15:36` (`✗` roja si falló).
-- **full**: divisor de ancho completo + ✓/✗ + el **texto del último comando** + hora
-  (útil para ubicar qué comando produjo qué, estilo bloques de Warp).
+- **full** ⭐: una **barra prominente con el comando ARRIBA** de su salida + `✓/✗` abajo
+  (estilo bloques de Warp / Claude). Así ves qué corriste y el resultado de un vistazo:
+  ```text
+   ▶ docker compose up -d
+  ...salida...
+  ── ✓ 15:36
+  ```
 - **off**: nada (solo las marcas de la barra de scroll).
 
 > Nota honesta: WT no tiene el "bloque sticky" de Warp (el comando pegado arriba mientras
@@ -472,7 +481,8 @@ Notas del formato:
 - `cheatsheet.sh` / `cheatsheet.cmd` — referencia rápida de comandos (IAs + layouts).
 - `ai-aliases.sh` — comando `lay` + atajos IA (`cr`, `csp`…) + carga la integración de shell. Se auto-localiza.
 - `shell-integration.sh` — marcas de comando + errores en rojo (OSC 133) para WT.
-- `run-keep.sh` — corre el/los comando(s) del panel y deja un bash interactivo.
+- `run-keep.sh` + `run-keep-rc.sh` — abren una bash interactiva y corren ahí el comando
+  del panel (Ctrl+C detiene solo el comando; la terminal sigue viva).
 - `new.sh` — crea un `.toml` nuevo + su `.cmd`.
 - `<layout>.sh` / `<layout>.cmd` — atajos (llaman a `open.sh <layout>`).
 - `all.sh` / `all.cmd` — la vista MEGA (todos).

@@ -3,7 +3,7 @@
 # para todos; solo cambia en qué shell corre cada panel.
 name = "example-shells"
 title = "EJEMPLO · SHELLS"
-color = "orange"
+color = "random"
 
 [[panes]]
 id = "root"

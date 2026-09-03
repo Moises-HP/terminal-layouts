@@ -35,6 +35,7 @@ configs/*.toml
 !ai-aliases.sh
 !shell-integration.sh
 !run-keep.sh
+!run-keep-rc.sh
 !all.sh
 !install.cmd
 !all.cmd

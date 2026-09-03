@@ -20,6 +20,17 @@ const PROFILE = 'Layouts';   // perfil dedicado (Git Bash + suppressApplicationT
 const HOME = (process.env.USERPROFILE || 'C:\\Users\\Default').replace(/\\/g, '/');
 const COLORS = { green:'#2ea043', magenta:'#c026d3', blue:'#2563eb', red:'#dc2626',
                  yellow:'#d4a72c', cyan:'#0891b2', orange:'#ea580c', purple:'#7c3aed' };
+// Paleta amplia para color = "random": color estable por NOMBRE del layout (mismo
+// layout → siempre el mismo color; layouts distintos se reparten → casi sin repetir).
+const RANDOM_PALETTE = ['#2ea043','#c026d3','#dc2626','#0891b2','#ea580c','#2563eb',
+  '#7c3aed','#d4a72c','#0d9488','#db2777','#4f46e5','#65a30d','#0284c7','#e11d48',
+  '#9333ea','#16a34a','#f59e0b','#14b8a6'];
+function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function resolveColor(raw, name) {
+  const s = String(raw || '').trim().toLowerCase();
+  if (s === 'random' || s === 'rand') return RANDOM_PALETTE[hashCode(name || 'x') % RANDOM_PALETTE.length];
+  return COLORS[s] || (String(raw || '').startsWith('#') ? String(raw).trim() : '');
+}
 
 // ── Parser TOML (subset Warp: top-level key=val + arrays [[panes]]) ───────────
 function parseValue(raw) {
@@ -104,6 +115,7 @@ function firstLeaf(n) { return n.leaf ? n : firstLeaf(n.children[0]); }
 // ── Emisión de argumentos wt.exe ─────────────────────────────────────────────
 const A = [];
 let LAYOUT_TITLE = 'tab';                    // título fijo del layout (todas las panes)
+let LAYOUT_COLOR = '';                       // color del tab (se pone en CADA panel)
 const push = (...xs) => { for (const x of xs) A.push(String(x)); };
 const size = (num, den) => (num / den).toFixed(3);
 
@@ -113,6 +125,9 @@ function createLeaf(leaf) {                 // args comunes de creación de un p
   // el commandline (override) elige el SHELL del panel y ejecuta sus 'commands'
   // dejando la terminal abierta (run-keep en bash, -NoExit en PS, /k en cmd).
   push('--title', LAYOUT_TITLE);
+  // --tabColor en CADA panel: si no, al enfocar un split-pane el tab pierde el color
+  // (WT muestra el color del panel ACTIVO). Así el tab queda coloreado siempre.
+  if (LAYOUT_COLOR) push('--tabColor', LAYOUT_COLOR);
   push('-p', PROFILE, '-d', leaf.dir);
   const cmds = leaf.cmds || [];
   switch (leaf.shell) {
@@ -197,7 +212,7 @@ const { top, panes } = parseToml(readFileSync(file, 'utf8'));
 const tree = buildTree(panes);
 const f0 = firstLeaf(tree);
 LAYOUT_TITLE = top.title || top.name || 'tab';
-const color = COLORS[top.color] || (String(top.color || '').startsWith('#') ? top.color : '');
+LAYOUT_COLOR = resolveColor(top.color, top.name || top.title || file);
 
 if (process.argv[3] === '--preview') {
   const rows = renderBlock(tree);
@@ -209,7 +224,6 @@ if (process.argv[3] === '--preview') {
 }
 
 push('new-tab');
-if (color) push('--tabColor', color);
 createLeaf(f0);
 emit(tree);
 

@@ -2,7 +2,7 @@
 #   split="horizontal" => columnas   ·   split="vertical" => filas
 name = "example-columns"
 title = "EJEMPLO · 2 COLUMNAS"
-color = "cyan"
+color = "random"
 
 [[panes]]
 id = "root"

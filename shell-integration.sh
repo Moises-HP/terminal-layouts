@@ -21,15 +21,18 @@ if [[ $- == *i* && -n "${WT_SESSION:-}" ]]; then
     printf ' \e[2m%s\e[0m\n' "$(date +%H:%M)"
   }
 
-  __lay_block_full() {
-    local e=$? cols line cmd
-    cols=$(tput cols 2>/dev/null || echo 80)
-    printf -v line '%*s' "$cols" ''; line=${line// /─}
-    printf '\e[38;5;238m%s\e[0m\n' "$line"
-    cmd=$(history 1 2>/dev/null | sed 's/^[[:space:]]*[0-9]\{1,\}[[:space:]]*//')
-    if [ "$e" -eq 0 ]; then printf '\e[1;32m✓\e[0m'; else printf '\e[1;31m✗ %s\e[0m' "$e"; fi
-    [ -n "$cmd" ] && printf ' \e[2m%s\e[0m' "$cmd"
-    printf ' \e[2m· %s\e[0m\n' "$(date +%H:%M:%S)"
+  # modo 'full': ENCABEZADO prominente con el comando ARRIBA de su salida (estilo Warp/
+  # Claude) + resultado compacto ✓/✗ abajo. Usa un preexec (trap DEBUG) con "armado".
+  __lay_armed=
+  __lay_arm() { __lay_armed=1; }
+  __lay_preexec() {
+    [ -n "$__lay_armed" ] || return
+    case "$BASH_COMMAND" in __lay_*|__wt_*) return ;; esac   # ignorar internos
+    [ -n "${COMP_LINE:-}" ] && return                         # ignorar autocompletado
+    __lay_armed=
+    local cmd; cmd=$(history 1 2>/dev/null | sed 's/^[[:space:]]*[0-9]\{1,\}[[:space:]]*//')
+    [ -n "$cmd" ] || return
+    printf '\n\e[1;48;5;24;38;5;231m ▶ %s \e[0m\n' "$cmd"   # barra: texto claro sobre azul
   }
 
   case "$PS1" in
@@ -39,7 +42,7 @@ if [[ $- == *i* && -n "${WT_SESSION:-}" ]]; then
 
   case "$LAY_BLOCKS" in
     off)  _lay_pc='__wt_dcode' ;;
-    full) _lay_pc='__wt_dcode; __lay_block_full' ;;
+    full) _lay_pc='__wt_dcode; __lay_block_compact; __lay_arm'; trap '__lay_preexec' DEBUG ;;
     *)    _lay_pc='__wt_dcode; __lay_block_compact' ;;
   esac
   case ";${PROMPT_COMMAND:-};" in

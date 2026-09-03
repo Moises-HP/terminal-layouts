@@ -87,7 +87,7 @@ case "$sub" in
         echo "Indicador por comando: ${cur:-compact}"
         echo "  off     = nada (solo marcas en la barra de scroll)"
         echo "  compact = una línea chica: ── ✓ 15:36   (por defecto)"
-        echo "  full    = divisor + ✓/✗ + último comando + hora"
+        echo "  full    = ▶ barra con el comando ARRIBA + ✓/✗ abajo (estilo Warp)"
         echo "Cambiar:  lay blocks off | compact | full" ;;
       *) echo "uso: lay blocks off | compact | full" ;;
     esac ;;
