@@ -24,6 +24,6 @@ case "$mode" in
     out="${2:-$(cd "$HERE/.." && pwd)/terminal-layouts-bundle.tgz}"
     (cd "$HERE/.." && tar --exclude='terminal-layouts/*.tgz' --exclude='terminal-layouts/.last' -czf "$out" terminal-layouts)
     echo "📦 bundle → $out   (toda la carpeta, lista para compartir)"
-    echo "   Tu compañero: descomprímelo en ~/Documents/GitHub/Proyectos/  y corre:  sh terminal-layouts/install.sh" ;;
+    echo "   Tu compañero: descomprímelo donde quiera y corre:  sh terminal-layouts/install.sh" ;;
   *) echo "uso: sh backup.sh export [arch] | import <arch> | bundle [arch]"; exit 1 ;;
 esac

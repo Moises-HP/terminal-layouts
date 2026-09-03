@@ -50,6 +50,7 @@ ${B}Ayuda / diagnóstico${R}
   ${G}lay doctor${R} ${D}[--fix]${R}         revisar salud (carpetas, conversión, atajos); --fix regenera atajos
   ${G}lay blocks${R} ${D}off|compact|full${R}  indicador visual por comando (✓/✗); por defecto compact
   ${G}lay shell${R} ${D}bash|pwsh|powershell|cmd${R}  shell por defecto de los paneles
+  ${G}lay base${R} ${D}<carpeta>${R}         carpeta base para nombres relativos en wiz/grid
   ${G}lay cheat${R}                cheatsheet (comandos de IAs + layouts)
   ${G}lay -h${R} / ${G}lay help${R}          esta ayuda
 
@@ -90,6 +91,14 @@ case "$sub" in
         echo "Cambiar:  lay blocks off | compact | full" ;;
       *) echo "uso: lay blocks off | compact | full" ;;
     esac ;;
+
+  base)
+    shift; cfg="$HERE/.layconfig"
+    if [ -n "${1:-}" ]; then set_cfg LAY_BASE "$1"; echo "✓ Carpeta base para nombres relativos (wiz/grid): $1"
+    else cur='~'; [ -f "$cfg" ] && cur="$(sed -n 's/^LAY_BASE=//p' "$cfg")"
+      echo "Carpeta base para nombres relativos en 'lay wiz' / 'lay grid': ${cur:-~}"
+      echo "  (al escribir 'mi-proyecto' se vuelve <base>/mi-proyecto; rutas con ~ / / C: van tal cual)"
+      echo "Cambiar:  lay base ~/Documents/GitHub    (o la carpeta donde tengas tus repos)"; fi ;;
 
   shell)
     shift; cfg="$HERE/.layconfig"

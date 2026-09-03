@@ -7,8 +7,10 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="$HERE/configs"
 
 ask(){ printf '%s' "$1" >&2; IFS= read -r _r || true; printf '%s' "$_r"; }
-# carpeta: relativa => se cuelga de ~/Documents/GitHub ; absoluta (~, /, C:) tal cual
-expand(){ case "$1" in ''|'~') printf '~/Documents/GitHub';; ~*|/*|[A-Za-z]:*) printf '%s' "$1";; *) printf '~/Documents/GitHub/%s' "$1";; esac; }
+# carpeta: relativa => se cuelga de LAY_BASE (por defecto ~) ; absoluta (~, /, C:) tal cual
+[ -f "$HERE/.layconfig" ] && . "$HERE/.layconfig" || true
+BASE="${LAY_BASE:-~}"
+expand(){ case "$1" in ''|'~') printf '%s' "$BASE";; ~*|/*|[A-Za-z]:*) printf '%s' "$1";; *) printf '%s/%s' "$BASE" "$1";; esac; }
 
 name="$(ask 'Nombre del layout (kebab, ej: mi-stack): ')"
 [ -n "$name" ] || { echo "Nombre vacío. Cancelado." >&2; exit 1; }

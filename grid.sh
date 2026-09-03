@@ -14,7 +14,9 @@ case "$cols" in ''|*[!0-9]*) echo "CxR inválido (ej: 2x2)"; exit 1;; esac
 case "$rows" in ''|*[!0-9]*) echo "CxR inválido (ej: 2x2)"; exit 1;; esac
 shift 2
 [ "$#" -eq "$(( cols * rows ))" ] || { echo "⛔ ${grid} necesita $(( cols*rows )) celdas, diste $#"; exit 1; }
-expand(){ case "$1" in ''|'~') printf '~/Documents/GitHub';; ~*|/*|[A-Za-z]:*) printf '%s' "$1";; *) printf '~/Documents/GitHub/%s' "$1";; esac; }
+[ -f "$HERE/.layconfig" ] && . "$HERE/.layconfig" || true   # LAY_BASE opcional
+BASE="${LAY_BASE:-~}"                                       # carpeta base para nombres relativos
+expand(){ case "$1" in ''|'~') printf '%s' "$BASE";; ~*|/*|[A-Za-z]:*) printf '%s' "$1";; *) printf '%s/%s' "$BASE" "$1";; esac; }
 cells=("$@")
 
 {

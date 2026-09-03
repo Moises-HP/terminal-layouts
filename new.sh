@@ -29,7 +29,7 @@ color = "green"          # green|magenta|blue|red|yellow|cyan|orange|purple o #h
 [[panes]]
 id = "main"
 type = "terminal"
-directory = "~/Documents/GitHub"
+directory = "~"
 # commands = ["bun i", "bun run dev"]   # se unen con &&; el panel queda abierto
 shell = "bash"
 
@@ -50,16 +50,16 @@ shell = "bash"
 #
 # [[panes]]
 # id = "a"
-# directory = "~/Documents/GitHub/proyecto-a"
+# directory = "~/proyectos/proyecto-a"
 # commands = ["npm run dev"]
 #
 # [[panes]]
 # id = "b"
-# directory = "~/Documents/GitHub/proyecto-b"
+# directory = "~/proyectos/proyecto-b"
 #
 # [[panes]]
 # id = "c"
-# directory = "~/Documents/GitHub/proyecto-c"
+# directory = "~/proyectos/proyecto-c"
 TPL
   echo "✅ Creado configs/$name.toml (plantilla — edítalo)."
 fi

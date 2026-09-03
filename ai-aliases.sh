@@ -1,7 +1,8 @@
 # ai-aliases.sh — atajos para IAs y layouts, usables desde CUALQUIER carpeta.
 #
-# Activar (una sola vez): añade esta línea a ~/.bashrc y recarga:
-#     source ~/Documents/GitHub/Proyectos/terminal-layouts/ai-aliases.sh
+# Activar (una sola vez): añade a ~/.bashrc un 'source' a ESTE archivo (donde lo tengas)
+# y recarga. install.sh lo hace por ti con la ruta correcta. Ejemplo:
+#     source /ruta/a/terminal-layouts/ai-aliases.sh
 #     source ~/.bashrc
 
 # ── Claude Code ──────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ lay() { sh "$LAYOUTS_DIR/lay.sh" "$@"; }
 # Autocompletado con Tab: 'lay <TAB>' → subcomandos + layouts ; 'lay add <TAB>' → layouts
 _lay_complete() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
-  local subs="menu add all last term new wiz grid preview edit dup rename rm combo export import bundle pin setup ls doctor blocks shell cheat help"
+  local subs="menu add all last term new wiz grid preview edit dup rename rm combo export import bundle pin setup ls doctor blocks shell base cheat help"
   local layouts; layouts="$(ls -1 "$LAYOUTS_DIR/configs"/*.toml 2>/dev/null | sed 's#.*/##; s#\.toml$##')"
   if [ "$COMP_CWORD" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "$subs $layouts" -- "$cur") )

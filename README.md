@@ -31,11 +31,12 @@ para todo— sobre Windows Terminal.
 
 Requisitos: **Git Bash**, **Node.js** y **Windows Terminal**.
 
-1. Clónalo (en Git Bash):
+1. Clónalo donde quieras (en Git Bash):
    ```bash
-   git clone https://github.com/Moises-HP/terminal-layouts.git ~/Documents/GitHub/Proyectos/terminal-layouts
+   git clone https://github.com/Moises-HP/terminal-layouts.git
    ```
-2. **Doble clic en `install.cmd`** *(o `sh install.sh`)*.
+2. **Doble clic en `install.cmd`** *(o `sh install.sh`)*. El instalador funciona esté
+   donde esté la carpeta.
 3. Abre una terminal nueva y prueba: `lay -h`.
 
 Guía completa para instalar/compartir: **[`INSTALL.md`](INSTALL.md)**. Licencia **MIT**.
@@ -301,8 +302,9 @@ sh wizard.sh                         # o doble clic wizard.cmd
 #   → genera configs/<nombre>.toml + <nombre>.sh/.cmd
 ```
 
-- La **carpeta** relativa se cuelga de `~/Documents/GitHub/` (ej. escribes
-  `pos_manager_REPO/pos_manager_app`). Rutas con `~`, `/` o `C:` se usan tal cual.
+- La **carpeta** relativa se cuelga de una **base** (por defecto tu carpeta de usuario `~`).
+  Cámbiala con `lay base ~/ruta/a/tus/repos` para que al escribir `mi-proyecto` se vuelva
+  `<base>/mi-proyecto`. Rutas con `~`, `/` o `C:` se usan tal cual.
 - El **comando** es opcional (Enter = solo abrir la carpeta).
 - El layout nuevo entra solo a `open.sh` / `pick` / `all`.
 
@@ -395,7 +397,7 @@ color = "green"            # green|magenta|blue|red|yellow|cyan|orange|purple o 
 # --- Panel único ---
 [[panes]]
 id = "main"
-directory = "~/Documents/GitHub/mi-proyecto"
+directory = "~/proyectos/mi-proyecto"
 commands = ["npm i", "npm run dev"]   # opcional; se unen con && ; el panel queda abierto
 ```
 
@@ -422,14 +424,14 @@ children = ["c"]           # 1 hijo = pasa directo
 
 [[panes]]
 id = "a"
-directory = "~/Documents/GitHub/a"
+directory = "~/proyectos/a"
 commands = ["npm run dev"]
 [[panes]]
 id = "b"
-directory = "~/Documents/GitHub/b"
+directory = "~/proyectos/b"
 [[panes]]
 id = "c"
-directory = "~/Documents/GitHub/c"
+directory = "~/proyectos/c"
 ```
 
 Regla de dirección (verificada con los configs reales de Warp):
@@ -512,7 +514,7 @@ lay bundle          # crea ../terminal-layouts-bundle.tgz con TODA la carpeta
 Pásale ese `.tgz` (o comparte la carpeta por git).
 
 **Tu compañero (2 pasos)** — hay una guía lista para él en **`INSTALL.md`**:
-1. Descomprime en `~/Documents/GitHub/Proyectos/` → queda `…/Proyectos/terminal-layouts/`.
+1. Descomprime la carpeta `terminal-layouts` donde quiera.
 2. **Doble clic en `install.cmd`** *(o: Git Bash ahí → `sh install.sh`)*.
 3. Abre una terminal **nueva** → ya tiene `lay`, atajos, tema y marcas.
 
