@@ -55,7 +55,8 @@ ${B}Ayuda / diagnóstico${R}
   ${G}lay -h${R} / ${G}lay help${R}          esta ayuda
 
 ${D}Tip: otra terminal en la MISMA carpeta donde estás → Ctrl+Shift+D (al lado)
-     o Ctrl+Shift+T (tab nuevo en el mismo directorio).${R}
+     o Ctrl+Shift+T (tab nuevo en el mismo directorio).
+     Pegar imagen en Claude Code → Alt+V (⊞ Win+Shift+S para capturar).${R}
 EOF
 }
 

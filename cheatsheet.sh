@@ -41,6 +41,7 @@ ${B}${Y}▶ Atajos de teclado (Windows Terminal)${R}
    ${G}Ctrl+Shift+D/E${R} dividir panel a la derecha / abajo (misma carpeta)
    ${G}Alt+flechas${R}    mover foco  ${D}·${R}  ${G}Ctrl+Alt+flechas${R}  reacomodar panel
    ${G}Ctrl+Shift+↑/↓${R} saltar entre comandos  ${D}·${R}  ${G}Ctrl+Shift+W${R}  cerrar panel
+   ${G}Alt+V${R}          pegar IMAGEN del portapapeles en Claude Code (⊞ Win+Shift+S captura)
 
 ${B}${Y}▶ Atajos útiles${R}
    ${G}bun i${R} · ${G}bun dev${R} · ${G}bun start:dev${R}          node/bun

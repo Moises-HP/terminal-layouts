@@ -230,7 +230,11 @@ Configurados en Windows Terminal (settings.json):
 | **Alt + ←/→/↑/↓** | mover el **foco** entre paneles |
 | **Ctrl+Alt + ←/→/↑/↓** | **reposicionar** (swap) el panel en esa dirección |
 | **Ctrl+Shift+W** | cerrar el panel |
+| **Alt+V** | **pegar una imagen** del portapapeles en **Claude Code** ⭐ (no Ctrl+V) |
 | Alt+Shift+D | (nativo) duplicar panel automático |
+
+> **Alt+V** es de Claude Code (pega la imagen del portapapeles directo al prompt). Captura
+> con ⊞ Win+Shift+S y pega con Alt+V. Ctrl+V pega **texto** (lo usa Windows Terminal).
 
 Nota: **Ctrl+Shift+T** duplica el tab actual (hereda su carpeta) → una terminal nueva
 justo donde estabas, en vez de abrir en `~`.

@@ -35,6 +35,7 @@ lay           # menú para elegir qué abrir
 - **Atajos**: Ctrl+Shift+T (tab en el mismo directorio), Ctrl+Shift+D (dividir a la
   derecha), Ctrl+Shift+E (dividir abajo), Alt+flechas (mover foco), Ctrl+Alt+flechas
   (reacomodar panel), Ctrl+Shift+↑/↓ (saltar entre comandos).
+- **Imágenes en Claude Code**: captura con ⊞ Win+Shift+S y pega con **Alt+V** (no Ctrl+V).
 - **Ayudas visuales**: panel activo resaltado, marcas por comando y **errores en rojo**
   en la barra de scroll.
 
