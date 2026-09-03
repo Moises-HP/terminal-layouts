@@ -206,6 +206,15 @@ línea del `~/.bashrc`.)
 > Flag correcto: `--dangerously-skip-permissions` (en plural).
 > CLIs disponibles aquí: `claude`, `codex`, `gemini`, `qwen`. (Antigravity es IDE, no CLI.)
 
+### Pegar imágenes a la IA (`img`)
+Las IAs de terminal (Claude Code, etc.) aceptan imágenes por **`@ruta`** (ej. escribes
+`@C:/fotos/captura.png`). Si tu terminal no deja **pegar** la imagen del portapapeles
+(como sí hacía Warp), usa el helper:
+```bash
+img          # (o 'lay img')  guarda la imagen del portapapeles y te da el @ruta listo para pegar
+```
+Flujo: captura con **Alt+Shift** → `img` → pega el `@ruta` que sale (queda en el portapapeles como texto).
+
 ## Atajos de teclado (estilo Warp)
 
 Configurados en Windows Terminal (settings.json):

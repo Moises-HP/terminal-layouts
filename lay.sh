@@ -76,6 +76,7 @@ case "$sub" in
   pin)            shift; exec sh "$HERE/pin.sh" "$@" ;;   # acceso en Inicio (para anclar)
   setup)          exec node "$HERE/wt-setup.mjs" ;;   # (re)configurar Windows Terminal
   cheat)          exec sh "$HERE/cheatsheet.sh" ;;
+  img|image)      exec sh "$HERE/clip-img.sh" ;;   # portapapeles → @ruta para la IA
   doctor|check)   shift; exec sh "$HERE/doctor.sh" "$@" ;;   # acepta --fix
   grid)           shift; exec sh "$HERE/grid.sh" "$@" ;;
   blocks|ui)
