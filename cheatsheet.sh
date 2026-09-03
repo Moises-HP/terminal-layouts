@@ -47,7 +47,7 @@ ${B}${Y}▶ Atajos útiles${R}
    ${G}docker compose up -d --build${R}              levantar stack
    ${G}tunnels sync && tunnels up${R}                túneles
    ${D}aliases IA: ${R}${G}cr${R}${D} = claude resume, ${R}${G}csp cc cx gm qw${R}
-   ${G}img${R}                          portapapeles → @ruta (pegar imagen en la IA)
+   ${D}pegar imagen en Claude: ${R}${G}Alt+V${R}${D} (Win+Shift+S para capturar). Respaldo: ${R}${G}img${R}
 
 EOF
 
