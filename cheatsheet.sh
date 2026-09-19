@@ -26,7 +26,7 @@ ${B}${Y}▶ Otras IAs${R}   ${D}(instaladas)${R}
 
 ${B}${Y}▶ Terminal Layouts — comando ${G}lay${R}   ${D}(desde cualquier carpeta)${R}
    ${G}lay${R}                       menú (elige cuáles abrir; incluye combos)
-   ${G}lay dev tunnels${R}           abrir esos (tabs)   ${D}·${R}  ${G}lay all${R}  todos
+   ${G}lay <a> <b>${R}             abrir esos (tabs)   ${D}·${R}  ${G}lay all${R}  todos
    ${G}lay add <x>${R}               a la ventana actual ${D}·${R}  ${G}lay last${R}  lo último
    ${G}lay term${R}                  una terminal normal (sin layout)
    ${G}lay new|wiz|grid <x>${R}      crear (plantilla / asistente / 1 línea)
@@ -46,7 +46,6 @@ ${B}${Y}▶ Atajos de teclado (Windows Terminal)${R}
 ${B}${Y}▶ Atajos útiles${R}
    ${G}bun i${R} · ${G}bun dev${R} · ${G}bun start:dev${R}          node/bun
    ${G}docker compose up -d --build${R}              levantar stack
-   ${G}tunnels sync && tunnels up${R}                túneles
    ${D}aliases IA: ${R}${G}cr${R}${D} = claude resume, ${R}${G}csp cc cx gm qw${R}
    ${D}pegar imagen en Claude: ${R}${G}Alt+V${R}${D} (Win+Shift+S para capturar). Respaldo: ${R}${G}img${R}
 

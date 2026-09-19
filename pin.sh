@@ -5,8 +5,8 @@
 #
 #   sh pin.sh                      menú interactivo (elige cuáles y dónde)
 #   sh pin.sh all                  TODOS los layouts (por defecto solo en Inicio)
-#   sh pin.sh dev pos-deploys      esos layouts
-#   sh pin.sh combo-deploys        un combo (su acceso levanta todo el combo)
+#   sh pin.sh example-columns example-grid-2x2   esos layouts
+#   sh pin.sh combo-trabajo        un combo (su acceso levanta todo el combo)
 #   sh pin.sh --start  <n...>      solo en Inicio (para anclar a la barra)
 #   sh pin.sh --desktop <n...>     solo en el Escritorio
 #   sh pin.sh --both   <n...>      en ambos (por defecto para nombres sueltos)

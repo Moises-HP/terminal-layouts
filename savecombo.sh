@@ -2,8 +2,8 @@
 # savecombo.sh <nombre> <layout1> <layout2> ... — guarda un CONJUNTO de layouts como
 # un atajo: combo-<nombre>.sh + combo-<nombre>.cmd que los abren juntos (tabs, 1 ventana).
 #
-#   sh savecombo.sh deploys pos-deploys surveys-deploys tunnels
-#   → doble clic combo-deploys.cmd  abre esos 3 en una ventana con tabs.
+#   sh savecombo.sh trabajo example-columns example-grid-2x2 example-shells
+#   → doble clic combo-trabajo.cmd  abre esos 3 en una ventana con tabs.
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; CFG="$HERE/configs"
 name="${1:-}"; [ "$#" -ge 2 ] || { echo "uso: sh savecombo.sh <nombre> <layout1> <layout2> ..."; exit 1; }

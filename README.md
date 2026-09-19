@@ -41,23 +41,23 @@ Requisitos: **Git Bash**, **Node.js** y **Windows Terminal**.
 
 Guía completa para instalar/compartir: **[`INSTALL.md`](INSTALL.md)**. Licencia **MIT**.
 
-> El repo trae **ejemplos** en `configs/example-*.toml`; crea los tuyos con `lay new` /
-> `lay wiz` / `lay grid`. Tus `.toml` personales quedan **fuera de git** (ver `.gitignore`).
-> Las tablas de más abajo muestran layouts del autor como referencia de lo que puedes armar.
+> El repo trae **ejemplos genéricos** en `configs/example-*.toml`; crea los tuyos con
+> `lay new` / `lay wiz` / `lay grid`. Tus `.toml` personales quedan **fuera de git**
+> (ver `.gitignore`), así que puedes armar tu propio entorno sin subirlo al repo.
 
 ## Uso
 
 Con una terminal ya abierta (`sh`):
 
 ```bash
-sh open.sh                       # MEGA: 1 ventana, 1 tab por layout (TODOS)
-sh open.sh pos-deploys           # solo ese layout (1 ventana)
-sh open.sh dev pos-deploys tunnels   # ESTOS 3 como tabs de UNA sola ventana ⭐
-sh pos-deploys.sh                # atajo equivalente a: sh open.sh pos-deploys
+sh open.sh                                   # MEGA: 1 ventana, 1 tab por layout (TODOS)
+sh open.sh example-columns                   # solo ese layout (1 ventana)
+sh open.sh example-columns example-grid-2x2 example-shells   # ESTOS 3 como tabs de UNA sola ventana ⭐
+sh example-columns.sh                        # atajo equivalente a: sh open.sh example-columns
 ```
 
 Con **doble clic** (Explorador): abre el `.cmd` del layout — `all.cmd`,
-`pos-deploys.cmd`, etc. (cada `.cmd` individual abre **una** ventana).
+`example-columns.cmd`, etc. (cada `.cmd` individual abre **una** ventana).
 
 ### Abrir varios juntos, eligiendo cuáles ⭐
 
@@ -66,16 +66,16 @@ Dos formas:
 1. **Directo** — pasa los nombres que quieras a `open.sh`; se abren como **tabs en una
    sola ventana** (en el orden que los escribas):
    ```bash
-   sh open.sh dev pos-deploys surveys-dev
+   sh open.sh example-single example-columns example-grid-2x2
    ```
 2. **Menú interactivo** — `pick` te lista los layouts y eliges por número o nombre
    (ideal para no recordarlos). Con terminal abierta o **doble clic en `pick.cmd`**:
    ```bash
    sh pick.sh
    #  Layouts disponibles:
-   #    1) databases   2) dev   3) layouts   4) pos-deploys ...
-   #  > 2 4 8              ← escribes números o nombres (o 'all')
-   #  Abriendo: dev pos-deploys tunnels
+   #    1) example-columns   2) example-grid-2x2   3) example-shells   4) example-single ...
+   #  > 1 2 4              ← escribes números o nombres (o 'all')
+   #  Abriendo: example-columns example-grid-2x2 example-single
    ```
 
 > Diferencia clave: los `.cmd`/`.sh` **individuales** = 1 layout = 1 ventana.
@@ -83,33 +83,27 @@ Dos formas:
 
 ### ¿Otra terminal donde ya estoy? / ¿desde cualquier carpeta?
 
-- **Otra terminal en la MISMA carpeta donde estás parado** (ej. estás en
-  `database_manager_package` y quieres otra ahí): **Ctrl+Shift+D** → divide a la
+- **Otra terminal en la MISMA carpeta donde estás parado** (ej. estás en un repo
+  cualquiera y quieres otra ahí): **Ctrl+Shift+D** → divide a la
   derecha, en la misma carpeta, al instante. Sin scripts. (Ctrl+Shift+E = abajo.)
 - **Un layout desde cualquier carpeta**: usa el comando **`lay`** (ya activado):
-  - `lay add databases` → lo mete como tab a tu **ventana actual**.
-  - `lay databases` → ventana nueva.
+  - `lay add example-columns` → lo mete como tab a tu **ventana actual**.
+  - `lay example-columns` → ventana nueva.
   - `sh open.sh …` / `sh add.sh …` "pelados" **solo** funcionan si estás parado en
     `terminal-layouts`; por eso existe `lay` (funciona desde donde sea).
 
-> Ojo con la diferencia: `lay add databases` abre el **layout** `databases`
-> (2 paneles: sucahersa + database_manager). Para una **terminal suelta en tu carpeta
+> Ojo con la diferencia: `lay add example-columns` abre el **layout** `example-columns`
+> (sus paneles, en sus carpetas). Para una **terminal suelta en tu carpeta
 > actual**, es **Ctrl+Shift+D**.
 
 ## Layouts actuales (`configs/*.toml`)
 
 | Config | Título | Rejilla | Corre al abrir |
 |---|---|---|---|
-| `dev` | DESARROLLO | 1 panel · `~/Documents/GitHub` | — |
-| `pos-dev` | POS_MANAGER | app / server (apilados) | `bun` dev |
-| `pos-deploys` | POS_MANAGER-DEPLOYS | app/employees/server │ replay/process/pos_sync | — |
-| `surveys-dev` | SURVEYS-DEV | smw / surveys-www │ sum | `npm run dev` |
-| `surveys-deploys` | SURVEYS-DEPLOYS | emp_manager/emp_auth/sum │ srv_manager/portal/www/manager-www | — |
-| `tunnels` | Tunnels | 1 panel · `~` con `tunnels sync && tunnels up` | tunnels |
-| `databases` | DATABASES | sucahersa_database ×2 │ database_manager_package ×2 | — |
-| `layouts` | TERMINAL-LAYOUTS | 1 panel · carpeta de estos scripts | — |
-| `claude-pos-manager-repo` | CLAUDE · POS_REPO | 2 terminales (izq │ der) en `pos_manager_REPO` | `claude --resume` |
-| `claude-github` | CLAUDE · GITHUB | 2 terminales (izq │ der) en `~/Documents/GitHub` | `claude --resume` |
+| `example-single` | EXAMPLE · SINGLE | 1 panel · `~` | — |
+| `example-columns` | EXAMPLE · COLUMNS | 2 columnas (izq │ der) | — |
+| `example-grid-2x2` | EXAMPLE · GRID | rejilla 2×2 (4 paneles) | — |
+| `example-shells` | EXAMPLE · SHELLS | mezcla de paneles bash / PowerShell / CMD | — |
 
 Los paneles con comando abren una **terminal interactiva normal** y corren ahí el comando
 (`run-keep.sh` → `run-keep-rc.sh`). Por eso **Ctrl+C detiene solo el comando y la terminal
@@ -118,17 +112,12 @@ sigue viva** (no se cierra ni pide "reiniciar"); igual que teclearlo tú mismo.
 ## Colores y títulos de los tabs
 
 Cada layout tiene un **color de tab** y un **título fijo** para distinguirlos de un
-vistazo (sobre todo en la vista MEGA):
+vistazo (sobre todo en la vista MEGA). Defínelos con las claves `color` y `title` en
+su `.toml`.
 
-| Layout | Color | | Layout | Color |
-|---|---|---|---|---|
-| dev | 🟢 verde | | surveys-deploys | 🟠 naranja |
-| pos-dev | 🟣 magenta | | tunnels | 🔵 azul |
-| pos-deploys | 🔴 rojo | | databases | 🟪 morado |
-| surveys-dev | 🟦 cian | | layouts | 🟡 amarillo |
-| claude-pos-manager-repo | 🟧 coral | | claude-github | 🟩 teal |
-
-(deploys en tonos cálidos 🔴🟠 = "producción, ojo".)
+Nombres de color aceptados: `green magenta blue red yellow cyan orange purple`, un
+`#hex`, o `random`. Un truco útil: reservar tonos cálidos (🔴🟠) para layouts de
+"producción, ojo" y tonos fríos para desarrollo, así los distingues de un vistazo.
 
 - **Cambiar color/título:** edita `color` / `title` en el `.toml` y **relanza** — no
   hay que regenerar `.sh`/`.cmd` (el color/título se leen del toml al abrir).
@@ -143,14 +132,14 @@ vistazo (sobre todo en la vista MEGA):
 
 ## Ayudas: IAs, cheatsheet y aliases
 
-### Layouts de Claude (2 terminales izq │ der, reanudan sesión)
-- `claude-pos-manager-repo` — 2 terminales en `pos_manager_REPO`, cada una con
-  `claude --resume --dangerously-skip-permissions`.
-- `claude-github` — igual pero en `~/Documents/GitHub`.
-```bash
-sh claude-github.sh          # o doble clic claude-github.cmd
-```
-Para abrir más, usa **Ctrl+Shift+D** (divide a la derecha, misma carpeta).
+### Tip: layouts con varias terminales corriendo un CLI
+Puedes crear un layout con 2+ paneles que corran **cualquier CLI** (una IA, un
+servidor, un watcher…) en carpetas fijas. Por ejemplo, 2 terminales lado a lado en la
+misma carpeta, cada una lanzando tu comando favorito al abrir (`commands = [...]` en el
+`.toml`). Ármalo en segundos con `lay wiz` o `lay grid`.
+
+Para abrir más paneles sobre la marcha, usa **Ctrl+Shift+D** (divide a la derecha,
+misma carpeta).
 
 ### Cheatsheet
 Referencia rápida de comandos (Claude/codex/gemini/qwen + sistema de layouts):
@@ -166,8 +155,8 @@ sh cheatsheet.sh             # o doble clic cheatsheet.cmd
 ```bash
 # Abrir
 lay                 # menú (incluye 't' = terminal normal)
-lay dev tunnels     # abrir esos (1 ventana con tabs)
-lay add databases   # agregar como tab a la VENTANA ACTUAL
+lay example-columns example-grid-2x2   # abrir esos (1 ventana con tabs)
+lay add example-shells   # agregar como tab a la VENTANA ACTUAL
 lay all             # todos (MEGA)      lay last   # reabrir lo último
 lay term            # terminal normal (Git Bash), sin layout
 # Crear / administrar
@@ -189,7 +178,7 @@ lay doctor [--fix]  # salud (+ regenerar atajos)   lay cheat   lay -h
 
 Ejemplos:
 ```bash
-lay preview surveys-deploys          # dibuja la rejilla 3│4 en ASCII
+lay preview example-grid-2x2         # dibuja la rejilla 2×2 en ASCII
 lay grid api 2x2 backend "frontend|npm run dev" db "worker|bun dev"
 ```
 
@@ -281,11 +270,11 @@ se reacomodan con **Ctrl+Alt+flechas** (swap). Es la forma equivalente.
 Por defecto cada `open.sh` abre una ventana nueva. Para **agregar** a la que ya tienes:
 
 ```bash
-sh add.sh databases                  # agrega 'databases' como tab a tu ventana actual
-sh add.sh dev tunnels                # agrega varios
+sh add.sh example-columns                    # agrega 'example-columns' como tab a tu ventana actual
+sh add.sh example-single example-shells      # agrega varios
 # equivalente explícito:
-sh open.sh -w last dev               # -w last = la última ventana usada
-sh open.sh -w 0 dev                  # -w 0 = la ventana actual ; o -w <nombre>
+sh open.sh -w last example-columns           # -w last = la última ventana usada
+sh open.sh -w 0 example-columns              # -w 0 = la ventana actual ; o -w <nombre>
 ```
 
 `add.sh` = `open.sh -w last`. También sirve para meter un **combo** a la ventana actual.
@@ -295,10 +284,10 @@ sh open.sh -w 0 dev                  # -w 0 = la ventana actual ; o -w <nombre>
 Un combo = un atajo que abre **varios layouts juntos** (tabs, 1 ventana).
 
 ```bash
-sh savecombo.sh deploys pos-deploys surveys-deploys tunnels
-#   crea combo-deploys.sh y combo-deploys.cmd
-sh combo-deploys.sh                  # o doble clic combo-deploys.cmd
-sh add.sh pos-deploys surveys-deploys tunnels   # ...o mételo a la ventana actual
+sh savecombo.sh trabajo example-columns example-grid-2x2 example-shells
+#   crea combo-trabajo.sh y combo-trabajo.cmd
+sh combo-trabajo.sh                  # o doble clic combo-trabajo.cmd
+sh add.sh example-columns example-grid-2x2 example-shells   # ...o mételo a la ventana actual
 ```
 
 - `combo-<nombre>.sh/.cmd` = `open.sh <esos layouts>`.
@@ -314,7 +303,7 @@ sh add.sh pos-deploys surveys-deploys tunnels   # ...o mételo a la ventana actu
   ```
   Valida que los layouts existan y no deja guardar un combo vacío.
 - **Borrar un combo:** `lay rm combo-<nombre>` (o `lay rm <nombre>` si es combo).
-- Ejemplo ya creado: **`combo-deploys`** (pos-deploys + surveys-deploys + tunnels).
+- Ejemplo: **`combo-trabajo`** (example-columns + example-grid-2x2 + example-shells).
 
 ## Asistente para crear layouts (wizard)
 
@@ -385,14 +374,16 @@ sh open.sh mi-layout              # pruébalo  (o doble clic mi-layout.cmd)
 
 **No editas ningún script.** `sh open.sh` (o `all.cmd`) sin argumentos arma la lista así:
 
-1. Primero mete los del **orden preferido** (variable `ORDER` en `open.sh`):
-   `dev pos-dev pos-deploys surveys-dev surveys-deploys tunnels`.
-2. Después recorre `configs/*.toml` y **agrega cualquier `.toml` que no esté en `ORDER`**,
-   al final.
+1. Primero mete los del **orden preferido** (variable `ORDER` en `open.sh`). Por
+   defecto `ORDER=()` está **vacío**, así que no fija ningún orden.
+2. Después recorre `configs/*.toml` y **agrega cualquier `.toml` que no esté ya en la
+   lista**. Como `ORDER` viene vacío, el orden final es simplemente **alfabético**
+   sobre `configs/*.toml`.
 
 Es decir: en cuanto existe `configs/mi-layout.toml`, aparece **solo** como un tab más
-en `sh open.sh` / `all.cmd`. Si quieres que salga en cierta posición (no al final),
-agrega su nombre a `ORDER` en `open.sh`.
+en `sh open.sh` / `all.cmd`. Si quieres fijar cierta posición (no alfabética),
+agrega los nombres que quieras a `ORDER` en `open.sh`: esos salen primero, en ese
+orden, y el resto se añade alfabéticamente después.
 
 ## Qué pasa por dentro cuando ejecutas `sh open.sh <nombre>`
 
@@ -549,9 +540,9 @@ Pásale ese `.tgz` (o comparte la carpeta por git).
 - Node.js — <https://nodejs.org>
 - Windows Terminal — Microsoft Store
 
-**Nota:** los layouts que apuntan a repos tuyos (ej. `pos-deploys`) solo levantan bien si
-tu compañero tiene esos repos en `~/Documents/GitHub/…`. Con `lay doctor` ve cuáles tienen
-carpetas que faltan; puede borrarlos (`lay rm`) o crear los suyos (`lay wiz`/`lay grid`).
+**Nota:** un layout que apunte a un repo o carpeta que tu compañero **no tiene** solo
+levanta bien si esa ruta existe en su PC. Con `lay doctor` ve cuáles tienen carpetas que
+faltan; puede borrarlos (`lay rm`) o crear los suyos (`lay wiz`/`lay grid`).
 El **sistema** (`lay`, atajos, tema, marcas) funciona igual para todos.
 
 ## Anclar a la barra de tareas / accesos en el Escritorio
@@ -560,11 +551,11 @@ El **sistema** (`lay`, atajos, tema, marcas) funciona igual para todos.
 `bash.exe` — por eso Windows **sí** te deja anclarlos a la barra (con un `.cmd` no se puede).
 
 ```bash
-lay pin                    # menú: elige cuáles y DÓNDE (Escritorio / solo Inicio / ambos)
-lay pin all                # TODOS los layouts (solo en Inicio, sin saturar el Escritorio)
-lay pin dev pos-deploys    # esos (en Escritorio + Inicio)
-lay pin --start dev        # solo Inicio  ·  --desktop = solo Escritorio  ·  --both = ambos
-lay pin combo-deploys      # un COMBO: un acceso que levanta TODO el combo de un clic ⭐
+lay pin                              # menú: elige cuáles y DÓNDE (Escritorio / solo Inicio / ambos)
+lay pin all                          # TODOS los layouts (solo en Inicio, sin saturar el Escritorio)
+lay pin example-columns example-grid-2x2   # esos (en Escritorio + Inicio)
+lay pin --start example-columns      # solo Inicio  ·  --desktop = solo Escritorio  ·  --both = ambos
+lay pin combo-trabajo                # un COMBO: un acceso que levanta TODO el combo de un clic ⭐
 ```
 
 - **Menú Inicio**: ⊞ Windows → escribe **`Layout`** (o **`Combo`**) → salen todos.
@@ -626,7 +617,7 @@ rejilla correcta, sin fugarse a otra pestaña. Variables (rara vez las tocas):
 
 ```bash
 LAY_SETTLE=1.0 lay all                  # PC lenta: más margen para que abra la ventana
-LAY_DRYRUN=1 lay combo-main             # ver exactamente qué se lanzaría
+LAY_DRYRUN=1 lay combo-trabajo          # ver exactamente qué se lanzaría
 ```
 
 > Si un layout apunta a una **carpeta inexistente**, ese panel da `0x80070057` aparte.
@@ -651,4 +642,5 @@ al perfil Layouts; tu Git Bash normal no cambia. Se (re)crea con `lay setup`.
 
 ## Requisitos (ya presentes)
 
-`wt.exe` (Windows Terminal), Git Bash, `node`, y en PATH: `bun`, `npm`, `tunnels`.
+`wt.exe` (Windows Terminal), Git Bash, `node`, y en PATH: los comandos que usen tus
+paneles (por ejemplo `bun`, `npm`).

@@ -23,7 +23,7 @@ done
 echo   "   t) terminal normal (Git Bash, sin layout)"
 echo
 echo "Escribe cuáles abrir (números o nombres, separados por espacio)."
-echo "Ej:  1 3 5   |   dev pos-deploys tunnels   |   all (todos)   |   t (terminal)   |   Enter = cancelar"
+echo "Ej:  1 3 5   |   example-columns example-grid-2x2   |   all (todos)   |   t (terminal)   |   Enter = cancelar"
 printf "> "
 read -r line
 

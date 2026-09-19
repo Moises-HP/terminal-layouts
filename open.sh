@@ -3,8 +3,8 @@
 # (un tab por layout). Cada layout = un .toml en ./configs/.
 #
 #   sh open.sh                     -> TODOS (orden definido) = vista MEGA
-#   sh open.sh pos-deploys         -> solo ese
-#   sh open.sh dev surveys-dev     -> esos dos como tabs de una ventana
+#   sh open.sh example-columns     -> solo ese
+#   sh open.sh example-columns example-shells   -> esos dos como tabs de una ventana
 #
 # Requiere: node, wt.exe, Git Bash. Los .toml se convierten con toml2wt.mjs.
 set -euo pipefail
