@@ -597,28 +597,39 @@ abre cada panel**.
 Los `commands` corren en ese shell y la terminal **queda abierta** (bash: `run-keep`;
 PowerShell: `-NoExit`; cmd: `/k`). Puedes **mezclar** shells en un mismo layout.
 
-## Apertura por etapas (evita el error `0x80070057`)
+## Apertura en dos fases (combos fiables, sin `0x80070057`)
 
-Windows Terminal a veces falla al crear **muchos paneles de golpe** con
-`error 0x80070057 al iniciar bash.exe` (una carrera interna de ConPTY). Para evitarlo,
-`open.sh` **no** abre todo en un disparo: manda varias llamadas a `wt.exe` a la misma
-ventana, con una micro‑pausa. Modos (variable `LAY_STAGE`):
+Cada `wt.exe -w <ventana> …` es **asíncrono**: entrega el comando a Windows Terminal
+y regresa **sin esperar**. Disparar muchos `split-pane` sueltos (sin decir a qué
+pestaña van) hacía que WT los aplicara al panel **activo del momento** → paneles en la
+pestaña equivocada, en desorden, o el error `0x80070057`. Por eso `open.sh` abre en
+**dos fases deterministas**:
 
-| `LAY_STAGE` | Qué hace | Velocidad |
+1. **Fase 1** — UNA sola llamada crea **todas las pestañas** con su primer panel
+   (`new-tab; new-tab; …`). Sin `split-pane` ⇒ nunca `0x80070057`; el orden de
+   pestañas queda fijo (llamada atómica).
+2. *(pausa única)* — esperar a que la ventana (maximizada) y las pestañas existan.
+3. **Fase 2** — por cada pestaña con subdivisiones, UNA llamada que primero hace
+   `focus-tab -t <índice>` (**fija la pestaña**) y luego sus `split-pane`/`move-focus`.
+   Al fijar la pestaña, **no importa** el orden en que WT procese las llamadas: cada
+   split cae **siempre** en su pestaña, sobre una ventana ya estable.
+
+Resultado: los combos (varios layouts a la vez) abren en el orden correcto, con su
+rejilla correcta, sin fugarse a otra pestaña. Variables (rara vez las tocas):
+
+| Variable | Qué hace | Def. |
 |---|---|---|
-| `auto` (por defecto) | Layouts chicos = 1 llamada (instantáneo). Layouts **densos** (más de `LAY_STAGE_MAX`=4 paneles) = **un panel por llamada** (a prueba de fallos). Varios layouts = un tab a la vez. | rápido |
-| `pane` | Siempre un panel por llamada. Úsalo si algo **aún** falla. | lento pero infalible |
-| `tab` | Un tab por llamada (no separa paneles dentro de un tab). | medio |
-| `none` | Todo en un disparo (comportamiento viejo). | máximo, pero puede fallar |
+| `LAY_SETTLE` | Segundos de espera tras crear las pestañas (fase 1). Súbelo en PCs lentas si a veces se abre una 2ª ventana vacía. | `0.5` |
+| `LAY_DELAY` | Micro‑pausa entre llamadas de la fase 2. | `0.08` |
+| `LAY_STAGE=none` | Escape: todo en un disparo (comportamiento viejo; puede fallar en layouts densos). | — |
+| `LAY_DRYRUN=1` | Imprime las llamadas a `wt.exe` **sin ejecutarlas** (diagnóstico). | — |
 
-Ejemplos (rara vez los necesitas — `auto` ya cubre casi todo):
 ```bash
-LAY_STAGE=pane lay surveys-deploys     # blindaje total para un layout muy denso
-LAY_STAGE=none lay dev                  # abrir de un jalón
-LAY_STAGE_MAX=2 lay all                 # ser más agresivo (stage a partir de 3 paneles)
+LAY_SETTLE=1.0 lay all                  # PC lenta: más margen para que abra la ventana
+LAY_DRYRUN=1 lay combo-main             # ver exactamente qué se lanzaría
 ```
 
-> Si un layout apunta a una **carpeta inexistente**, ese panel también da `0x80070057`.
+> Si un layout apunta a una **carpeta inexistente**, ese panel da `0x80070057` aparte.
 > Revisa con `lay doctor` (te avisa cuáles faltan).
 
 ## Windows Terminal

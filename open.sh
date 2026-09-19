@@ -66,46 +66,82 @@ for n in "${names[@]}"; do
   firstlayout=0
 done
 
-# ── Lanzamiento por ETAPAS (evita el error 0x80070057 de ConPTY) ─────────────
-# El error aparece cuando Windows Terminal crea muchos paneles de golpe. En vez de
-# un solo disparo, mandamos varias llamadas a wt.exe apuntando a la MISMA ventana:
-#   LAY_STAGE=tab   (por defecto) → una llamada por TAB (layout). Rápido: abrir 1
-#                    layout = 1 llamada (como antes); abrir varios = 1 por tab, en
-#                    secuencia → no hay carrera entre tabs.
-#   LAY_STAGE=pane  → una llamada por PANEL. El más lento pero a prueba de balas
-#                    (úsalo si un layout muy denso aún falla): LAY_STAGE=pane sh open.sh …
-#   LAY_STAGE=none  → todo en un solo disparo (el comportamiento viejo).
-if [ ${#WIN[@]} -gt 0 ]; then WINREF=("${WIN[@]}"); MAXFLAG=(); else WINREF=(-w "lay_$$"); MAXFLAG=("${MAX[@]}"); fi
-STAGE="${LAY_STAGE:-auto}"          # auto | tab | pane | none
-MAXP="${LAY_STAGE_MAX:-4}"          # en 'auto': tabs con MÁS de este nº de paneles → por-panel
-DELAY="${LAY_DELAY:-0.2}"
-firstcall=1
-emit() {                            # emit <inicio> <fin>  → una llamada a wt con A[inicio..fin)
-  local a=$1; local b=$2; local seg=("${A[@]:$a:$((b-a))}")
-  [ ${#seg[@]} -gt 0 ] || return 0
-  if [ "$firstcall" = 1 ]; then wt.exe "${WINREF[@]}" "${MAXFLAG[@]}" "${seg[@]}"; firstcall=0
-  else sleep "$DELAY"; wt.exe "${WINREF[@]}" "${seg[@]}"; fi
-}
+# ── Lanzamiento en DOS FASES (determinista: sin carreras y sin 0x80070057) ────
+# Cada 'wt.exe -w <win> …' es ASÍNCRONO: entrega el comando a la ventana y regresa
+# sin esperar. Disparar varios 'split-pane' SUELTOS (sin decir a qué pestaña van)
+# hace que Windows Terminal los aplique al panel ACTIVO en ese instante → paneles
+# en la pestaña equivocada, en desorden, o error 0x80070057. Por eso:
+#   FASE 1  UNA llamada crea TODAS las pestañas con su PRIMER panel (new-tab; …).
+#           Sin splits ⇒ nunca 0x80070057; el orden de pestañas queda fijo (atómico).
+#   settle  esperar UNA vez a que la ventana (maximizada) y las pestañas existan.
+#   FASE 2  Por cada pestaña con subdivisiones, UNA llamada que hace 'focus-tab -t
+#           <i>' (fija la pestaña por índice) y luego sus split-pane/move-focus. Al
+#           fijar la pestaña, ya no importa el orden en que WT procese las llamadas:
+#           cada split cae SIEMPRE en su pestaña, sobre una ventana ya estable.
+#   LAY_STAGE=none → todo en un solo disparo (comportamiento viejo; escape).
+#   LAY_SETTLE (0.5) espera tras crear las pestañas · LAY_DELAY (0.08) micro-stagger.
+#   LAY_DRYRUN=1 imprime las llamadas a wt.exe en vez de ejecutarlas (diagnóstico).
+WT() { if [ "${LAY_DRYRUN:-}" = "1" ]; then printf 'wt.exe'; printf ' %q' "$@"; printf '\n'; else wt.exe "$@"; fi; }
+
+if [ ${#WIN[@]} -gt 0 ]; then WINREF=("${WIN[@]}"); MAXFLAG=(); INTO=1
+else WINREF=(-w "lay_$$"); MAXFLAG=("${MAX[@]}"); INTO=0; fi
+STAGE="${LAY_STAGE:-auto}"          # auto | none
+SETTLE="${LAY_SETTLE:-0.5}"         # espera única tras crear las pestañas (FASE 1)
+DELAY="${LAY_DELAY:-0.08}"          # micro-stagger entre llamadas de FASE 2
 
 if [ "$STAGE" = "none" ]; then
-  wt.exe "${WINREF[@]}" "${MAXFLAG[@]}" "${A[@]}"
+  WT "${WINREF[@]}" "${MAXFLAG[@]}" "${A[@]}"
+  exit 0
+fi
+
+# límites de cada pestaña (índices con 'new-tab') + centinela final
+total=${#A[@]}
+tabs=(); for ((i=0;i<total;i++)); do [ "${A[$i]}" = "new-tab" ] && tabs+=("$i"); done; tabs+=("$total")
+ntabs=$(( ${#tabs[@]} - 1 ))
+
+# para cada pestaña: inicio, fin (sin ';' final) y punto del primer split-pane
+starts=(); ends=(); splitat=()
+for ((t=0;t<ntabs;t++)); do
+  s=${tabs[$t]}; e=${tabs[$((t+1))]}
+  [ "$e" -gt "$s" ] && [ "${A[$((e-1))]}" = ";" ] && e=$((e-1))     # soltar ';' que precede al sig. new-tab
+  sp=-1
+  for ((i=s;i<e-1;i++)); do
+    [ "${A[$i]}" = ";" ] && [ "${A[$((i+1))]}" = "split-pane" ] && { sp=$i; break; }
+  done
+  starts+=("$s"); ends+=("$e"); splitat+=("$sp")
+done
+
+if [ "$INTO" = "1" ]; then
+  # Ventana EXISTENTE: no sabemos el índice base ⇒ no usamos 'focus-tab -t'. Cada
+  # pestaña se manda COMPLETA en su propia llamada atómica: 'new-tab' enfoca la
+  # nueva pestaña y sus splits se aplican en la MISMA llamada ⇒ nunca se fugan.
+  for ((t=0;t<ntabs;t++)); do
+    s=${starts[$t]}; e=${ends[$t]}; seg=()
+    for ((i=s;i<e;i++)); do seg+=("${A[$i]}"); done
+    [ "$t" -gt 0 ] && sleep "$SETTLE"
+    WT "${WINREF[@]}" "${seg[@]}"
+  done
 else
-  total=${#A[@]}
-  # índices donde empieza cada tab (token 'new-tab') + centinela final
-  tabs=(); for ((i=0;i<total;i++)); do [ "${A[$i]}" = "new-tab" ] && tabs+=($i); done; tabs+=($total)
-  for ((t=0;t<${#tabs[@]}-1;t++)); do
-    s=${tabs[$t]}; e=${tabs[$((t+1))]}
-    [ "$e" -gt "$s" ] && [ "${A[$((e-1))]}" = ";" ] && e=$((e-1))   # soltar ';' que precede al sig. new-tab
-    panes=1; for ((i=s;i<e;i++)); do [ "${A[$i]}" = "split-pane" ] && panes=$((panes+1)); done
-    if [ "$STAGE" = "pane" ] || { [ "$STAGE" = "auto" ] && [ "$panes" -gt "$MAXP" ]; }; then
-      # tab denso → un panel por llamada (a prueba de balas)
-      ps=$s
-      for ((i=s;i<e;i++)); do
-        if [ "${A[$i]}" = ";" ] && [ "${A[$((i+1))]:-}" = "split-pane" ]; then emit "$ps" "$i"; ps=$((i+1)); fi
-      done
-      emit "$ps" "$e"
-    else
-      emit "$s" "$e"                                                # tab ligero → una sola llamada (rápido)
-    fi
+  # FASE 1: todas las pestañas con su primer panel, en UNA llamada atómica.
+  pass1=()
+  for ((t=0;t<ntabs;t++)); do
+    s=${starts[$t]}; e=${ends[$t]}; sp=${splitat[$t]}
+    headEnd=$e; [ "$sp" -ge 0 ] && headEnd=$sp
+    [ "$t" -gt 0 ] && pass1+=(";")
+    for ((i=s;i<headEnd;i++)); do pass1+=("${A[$i]}"); done
+  done
+  WT "${WINREF[@]}" "${MAXFLAG[@]}" "${pass1[@]}"
+
+  # settle: esperar UNA vez a que la ventana + pestañas existan.
+  sleep "$SETTLE"
+
+  # FASE 2: subdividir cada pestaña fijándola por índice (orden-independiente).
+  for ((t=0;t<ntabs;t++)); do
+    sp=${splitat[$t]}; e=${ends[$t]}
+    [ "$sp" -ge 0 ] || continue
+    seg=(focus-tab -t "$t")
+    for ((i=sp;i<e;i++)); do seg+=("${A[$i]}"); done
+    sleep "$DELAY"
+    WT "${WINREF[@]}" "${seg[@]}"
   done
 fi
