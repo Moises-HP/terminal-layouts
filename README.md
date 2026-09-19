@@ -588,35 +588,38 @@ abre cada panel**.
 Los `commands` corren en ese shell y la terminal **queda abierta** (bash: `run-keep`;
 PowerShell: `-NoExit`; cmd: `/k`). Puedes **mezclar** shells en un mismo layout.
 
-## Apertura en dos fases (combos fiables, sin `0x80070057`)
+## Apertura de combos: una invocación atómica (fiable, sin `0x80070057`)
 
-Cada `wt.exe -w <ventana> …` es **asíncrono**: entrega el comando a Windows Terminal
-y regresa **sin esperar**. Disparar muchos `split-pane` sueltos (sin decir a qué
-pestaña van) hacía que WT los aplicara al panel **activo del momento** → paneles en la
-pestaña equivocada, en desorden, o el error `0x80070057`. Por eso `open.sh` abre en
-**dos fases deterministas**:
+Dentro de **una sola** llamada a `wt.exe`, Windows Terminal ejecuta las acciones
+(`new-tab` / `split-pane` / `move-focus`) **en orden y de forma atómica** contra la
+ventana → el layout sale exacto. El problema **nunca fue una sola llamada**: era
+disparar **varias** llamadas `wt.exe -w <ventana> …`. Son **asíncronas** y corren en
+paralelo; sus comandos se **entrelazan** y comparten el **foco global** de la ventana,
+así que un `split-pane` de una llamada cae en la pestaña que dejó enfocada **otra**
+llamada → paneles fugados a otra pestaña, desorden, pestañas densas **fusionadas**.
 
-1. **Fase 1** — UNA sola llamada crea **todas las pestañas** con su primer panel
-   (`new-tab; new-tab; …`). Sin `split-pane` ⇒ nunca `0x80070057`; el orden de
-   pestañas queda fijo (llamada atómica).
-2. *(pausa única)* — esperar a que la ventana (maximizada) y las pestañas existan.
-3. **Fase 2** — por cada pestaña con subdivisiones, UNA llamada que primero hace
-   `focus-tab -t <índice>` (**fija la pestaña**) y luego sus `split-pane`/`move-focus`.
-   Al fijar la pestaña, **no importa** el orden en que WT procese las llamadas: cada
-   split cae **siempre** en su pestaña, sobre una ventana ya estable.
+Por eso `open.sh` **no fragmenta** la construcción. El único motivo para no meter todo
+en un disparo era el `0x80070057` (WT parte los paneles antes de maximizar y alguno
+queda por debajo del tamaño mínimo). Se resuelve **pre-maximizando**:
 
-Resultado: los combos (varios layouts a la vez) abren en el orden correcto, con su
-rejilla correcta, sin fugarse a otra pestaña. Variables (rara vez las tocas):
+1. Una llamada mínima abre la ventana **maximizada** con solo el primer panel (sin
+   splits ⇒ nunca `0x80070057`).
+2. *(pausa única, `LAY_SETTLE`)* — esperar a que la ventana ya esté maximizada.
+3. **Una** invocación atómica con **todo** el resto (los splits del primer tab + los
+   demás tabs completos). Al ser un solo proceso, **no hay carrera de foco posible** y,
+   como la ventana ya está a tamaño completo, los splits siempre caben.
+
+Resultado: los combos abren en el orden correcto, con su rejilla correcta, sin fugarse
+a otra pestaña. `lay add` (ventana existente) manda todo en una sola invocación igual.
 
 | Variable | Qué hace | Def. |
 |---|---|---|
-| `LAY_SETTLE` | Segundos de espera tras crear las pestañas (fase 1). Súbelo en PCs lentas si a veces se abre una 2ª ventana vacía. | `0.5` |
-| `LAY_DELAY` | Micro‑pausa entre llamadas de la fase 2. | `0.08` |
-| `LAY_STAGE=none` | Escape: todo en un disparo (comportamiento viejo; puede fallar en layouts densos). | — |
+| `LAY_SETTLE` | Segundos de espera tras abrir+maximizar la ventana. Súbelo en PCs lentas si a veces se abre una 2ª ventana vacía o algún panel falla. | `0.7` |
+| `LAY_STAGE=none` | Escape: todo en un único disparo **sin** pre-maximizar (más rápido; puede dar `0x80070057` en layouts densos). | — |
 | `LAY_DRYRUN=1` | Imprime las llamadas a `wt.exe` **sin ejecutarlas** (diagnóstico). | — |
 
 ```bash
-LAY_SETTLE=1.0 lay all                  # PC lenta: más margen para que abra la ventana
+LAY_SETTLE=1.2 lay all                  # PC lenta: más margen para que maximice
 LAY_DRYRUN=1 lay combo-trabajo          # ver exactamente qué se lanzaría
 ```
 

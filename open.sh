@@ -66,82 +66,71 @@ for n in "${names[@]}"; do
   firstlayout=0
 done
 
-# ── Lanzamiento en DOS FASES (determinista: sin carreras y sin 0x80070057) ────
-# Cada 'wt.exe -w <win> …' es ASÍNCRONO: entrega el comando a la ventana y regresa
-# sin esperar. Disparar varios 'split-pane' SUELTOS (sin decir a qué pestaña van)
-# hace que Windows Terminal los aplique al panel ACTIVO en ese instante → paneles
-# en la pestaña equivocada, en desorden, o error 0x80070057. Por eso:
-#   FASE 1  UNA llamada crea TODAS las pestañas con su PRIMER panel (new-tab; …).
-#           Sin splits ⇒ nunca 0x80070057; el orden de pestañas queda fijo (atómico).
-#   settle  esperar UNA vez a que la ventana (maximizada) y las pestañas existan.
-#   FASE 2  Por cada pestaña con subdivisiones, UNA llamada que hace 'focus-tab -t
-#           <i>' (fija la pestaña por índice) y luego sus split-pane/move-focus. Al
-#           fijar la pestaña, ya no importa el orden en que WT procese las llamadas:
-#           cada split cae SIEMPRE en su pestaña, sobre una ventana ya estable.
-#   LAY_STAGE=none → todo en un solo disparo (comportamiento viejo; escape).
-#   LAY_SETTLE (0.5) espera tras crear las pestañas · LAY_DELAY (0.08) micro-stagger.
-#   LAY_DRYRUN=1 imprime las llamadas a wt.exe en vez de ejecutarlas (diagnóstico).
+# ── Lanzamiento: UNA invocación atómica construye TODO el layout ──────────────
+# CLAVE: dentro de UNA sola llamada a wt.exe, Windows Terminal ejecuta las acciones
+# (new-tab / split-pane / move-focus) en ORDEN y de forma atómica contra la ventana
+# → el layout sale exacto. El problema NUNCA fue una sola llamada; fue disparar
+# VARIAS llamadas 'wt.exe -w <win> …' (son asíncronas y corren en paralelo): sus
+# comandos se entrelazan y comparten el foco GLOBAL de la ventana, así que un
+# split-pane de una llamada cae en la pestaña que dejó enfocada OTRA llamada →
+# paneles fugados a otra pestaña, desorden, pestañas densas fusionadas.
+#
+# Por eso NO fragmentamos la construcción. El único motivo para no meter todo en
+# un disparo era el error 0x80070057 (WT parte los paneles antes de maximizar, y
+# alguno queda por debajo del tamaño mínimo). Se resuelve PRE-MAXIMIZANDO:
+#   1) una llamada mínima abre la ventana MAXIMIZADA con el 1er panel (sin splits).
+#   2) settle: esperar UNA vez a que la ventana ya esté maximizada y estable.
+#   3) UNA invocación atómica con TODO el resto (splits del 1er tab + los demás
+#      tabs completos). Al ser un solo proceso, no hay carrera de foco posible y,
+#      como la ventana ya está a tamaño completo, los splits siempre caben.
+#
+#   LAY_STAGE=none → todo en un único disparo maximizado (sin pre-maximizar; escape).
+#   LAY_SETTLE (0.7) = espera tras abrir/maximizar la ventana (súbelo en PC lenta).
+#   LAY_DRYRUN=1     = imprime las llamadas a wt.exe en vez de ejecutarlas.
 WT() { if [ "${LAY_DRYRUN:-}" = "1" ]; then printf 'wt.exe'; printf ' %q' "$@"; printf '\n'; else wt.exe "$@"; fi; }
 
 if [ ${#WIN[@]} -gt 0 ]; then WINREF=("${WIN[@]}"); MAXFLAG=(); INTO=1
 else WINREF=(-w "lay_$$"); MAXFLAG=("${MAX[@]}"); INTO=0; fi
 STAGE="${LAY_STAGE:-auto}"          # auto | none
-SETTLE="${LAY_SETTLE:-0.5}"         # espera única tras crear las pestañas (FASE 1)
-DELAY="${LAY_DELAY:-0.08}"          # micro-stagger entre llamadas de FASE 2
+SETTLE="${LAY_SETTLE:-0.7}"         # espera tras abrir+maximizar la ventana
 
-if [ "$STAGE" = "none" ]; then
+# Ventana EXISTENTE (lay add / -w), o escape 'none': TODO en una sola invocación
+# atómica (determinista, sin fugas). Sin maximizar en el caso -w (ya existe).
+if [ "$INTO" = "1" ] || [ "$STAGE" = "none" ]; then
   WT "${WINREF[@]}" "${MAXFLAG[@]}" "${A[@]}"
   exit 0
 fi
 
-# límites de cada pestaña (índices con 'new-tab') + centinela final
+# ── Ventana NUEVA: pre-maximizar + una invocación atómica ─────────────────────
 total=${#A[@]}
+# índices donde empieza cada pestaña ('new-tab') + centinela final
 tabs=(); for ((i=0;i<total;i++)); do [ "${A[$i]}" = "new-tab" ] && tabs+=("$i"); done; tabs+=("$total")
 ntabs=$(( ${#tabs[@]} - 1 ))
 
-# para cada pestaña: inicio, fin (sin ';' final) y punto del primer split-pane
-starts=(); ends=(); splitat=()
-for ((t=0;t<ntabs;t++)); do
-  s=${tabs[$t]}; e=${tabs[$((t+1))]}
-  [ "$e" -gt "$s" ] && [ "${A[$((e-1))]}" = ";" ] && e=$((e-1))     # soltar ';' que precede al sig. new-tab
-  sp=-1
-  for ((i=s;i<e-1;i++)); do
-    [ "${A[$i]}" = ";" ] && [ "${A[$((i+1))]}" = "split-pane" ] && { sp=$i; break; }
-  done
-  starts+=("$s"); ends+=("$e"); splitat+=("$sp")
+# fin real de la 1ª pestaña y punto de su primer split-pane
+e0=${tabs[1]}
+[ "$e0" -gt "${tabs[0]}" ] && [ "${A[$((e0-1))]}" = ";" ] && e0=$((e0-1))
+sp0=-1
+for ((i=${tabs[0]};i<e0-1;i++)); do
+  [ "${A[$i]}" = ";" ] && [ "${A[$((i+1))]}" = "split-pane" ] && { sp0=$i; break; }
 done
 
-if [ "$INTO" = "1" ]; then
-  # Ventana EXISTENTE: no sabemos el índice base ⇒ no usamos 'focus-tab -t'. Cada
-  # pestaña se manda COMPLETA en su propia llamada atómica: 'new-tab' enfoca la
-  # nueva pestaña y sus splits se aplican en la MISMA llamada ⇒ nunca se fugan.
-  for ((t=0;t<ntabs;t++)); do
-    s=${starts[$t]}; e=${ends[$t]}; seg=()
-    for ((i=s;i<e;i++)); do seg+=("${A[$i]}"); done
-    [ "$t" -gt 0 ] && sleep "$SETTLE"
-    WT "${WINREF[@]}" "${seg[@]}"
-  done
-else
-  # FASE 1: todas las pestañas con su primer panel, en UNA llamada atómica.
-  pass1=()
-  for ((t=0;t<ntabs;t++)); do
-    s=${starts[$t]}; e=${ends[$t]}; sp=${splitat[$t]}
-    headEnd=$e; [ "$sp" -ge 0 ] && headEnd=$sp
-    [ "$t" -gt 0 ] && pass1+=(";")
-    for ((i=s;i<headEnd;i++)); do pass1+=("${A[$i]}"); done
-  done
-  WT "${WINREF[@]}" "${MAXFLAG[@]}" "${pass1[@]}"
+# 1) abrir ventana MAXIMIZADA con SOLO el primer panel del primer tab (sin splits).
+head0End=$e0; [ "$sp0" -ge 0 ] && head0End=$sp0
+call1=(); for ((i=${tabs[0]};i<head0End;i++)); do call1+=("${A[$i]}"); done
+WT "${WINREF[@]}" "${MAXFLAG[@]}" "${call1[@]}"
 
-  # settle: esperar UNA vez a que la ventana + pestañas existan.
-  sleep "$SETTLE"
+# 2) esperar a que la ventana esté abierta y maximizada.
+sleep "$SETTLE"
 
-  # FASE 2: subdividir cada pestaña fijándola por índice (orden-independiente).
-  for ((t=0;t<ntabs;t++)); do
-    sp=${splitat[$t]}; e=${ends[$t]}
-    [ "$sp" -ge 0 ] || continue
-    seg=(focus-tab -t "$t")
-    for ((i=sp;i<e;i++)); do seg+=("${A[$i]}"); done
-    sleep "$DELAY"
-    WT "${WINREF[@]}" "${seg[@]}"
-  done
+# 3) UNA invocación atómica con el resto: splits del 1er tab (la ventana ya lo tiene
+#    enfocado) + TODO el resto de A (';' new-tab … por cada pestaña siguiente).
+call2=()
+if [ "$sp0" -ge 0 ]; then                      # splits del primer tab (sin el ';' inicial)
+  for ((i=sp0+1;i<e0;i++)); do call2+=("${A[$i]}"); done
 fi
+for ((i=e0;i<total;i++)); do call2+=("${A[$i]}"); done   # el resto de tabs, tal cual (empieza con ';')
+# quitar un ';' inicial sobrante (si el 1er tab no tenía splits, A[e0] es el ';' pre-new-tab)
+[ "${#call2[@]}" -gt 0 ] && [ "${call2[0]}" = ";" ] && call2=("${call2[@]:1}")
+
+[ "${#call2[@]}" -gt 0 ] && WT "${WINREF[@]}" "${call2[@]}"
