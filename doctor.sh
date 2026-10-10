@@ -2,8 +2,9 @@
 # doctor.sh — chequeo de salud de todos los layouts: que conviertan, que sus
 # carpetas existan, y que tengan sus atajos .sh/.cmd. (lay doctor)
 set -uo pipefail
-export MSYS_NO_PATHCONV=1
-HERE="$(cd "$(dirname "$0")" && pwd -W)"
+. "$(cd "$(dirname "$0")" && pwd)/platform.sh"
+[ "$(_lay_os)" = "windows" ] && export MSYS_NO_PATHCONV=1
+HERE="$(_lay_here)"
 CFG="$HERE/configs"
 G=$'\e[32m'; Y=$'\e[33m'; Rd=$'\e[31m'; D=$'\e[2m'; R=$'\e[0m'
 FIX=0; [ "${1:-}" = "--fix" ] && FIX=1
@@ -22,7 +23,8 @@ for f in "$CFG"/*.toml; do
   err="$(cat "$errf")"; rm -f "$errf"
   panes=$(printf '%s' "$out" | grep -c 'new-tab\|split-pane')
   sh_ok=$([ -f "$HERE/$n.sh" ]  && echo "sh"  || echo "${Y}sin-sh${R}")
-  cmd_ok=$([ -f "$HERE/$n.cmd" ] && echo "cmd" || echo "${Y}sin-cmd${R}")
+  if [ "$(_lay_os)" = "darwin" ]; then cmd_ok="—"
+  else cmd_ok=$([ -f "$HERE/$n.cmd" ] && echo "cmd" || echo "${Y}sin-cmd${R}"); fi
 
   if [ -z "$out" ]; then
     printf "${Rd}✗ %-26s NO convierte${R}\n" "$n"; prob=$((prob+1))

@@ -1,24 +1,27 @@
 #!/usr/bin/env node
-// toml2wt.mjs — convierte un tab-config estilo Warp en la lista de argumentos de
-// una pestaña de Windows Terminal (wt.exe). Imprime un arg por línea.
+// toml2wt.mjs — convierte un tab-config estilo Warp en argumentos de terminal.
 //
-//   node toml2wt.mjs <config.toml>
-//
-// Lo consume open.sh, que junta varias pestañas en una sola ventana.
+// Modos:
+//   node toml2wt.mjs <config.toml>                         → args wt.exe (Windows)
+//   node toml2wt.mjs <config.toml> --preview               → ASCII preview
+//   node toml2wt.mjs <config.toml> --applescript iterm      → AppleScript para iTerm2
+//   node toml2wt.mjs <config.toml> --applescript terminal   → AppleScript para Terminal.app
+//   (agregar --tab para crear tab en vez de ventana nueva)
 //
 // Mapeo de dirección (semántica Warp, verificada con los configs reales):
-//   split="horizontal"  => columnas (izq | der)  => wt -V  (divisor vertical)
-//   split="vertical"    => filas (arriba/abajo)  => wt -H  (divisor horizontal)
+//   split="horizontal"  => columnas (izq | der)  => wt -V / iTerm split vertically
+//   split="vertical"    => filas (arriba/abajo)  => wt -H / iTerm split horizontally
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-// Detectar bash.exe de Git: derivar de PATH + ubicaciones comunes.
+const IS_MAC = process.platform === 'darwin';
+
+// ── Git Bash (solo Windows) ─────────────────────────────────────────────────
 import { execSync } from 'node:child_process';
-const GB = (() => {
+const GB = IS_MAC ? '' : (() => {
   const candidates = [process.env.GIT_BASH_EXE];
-  // Derivar desde git.exe en PATH: subir directorios hasta encontrar bin/bash.exe
   try {
     const gitPath = execSync('where git', { encoding: 'utf8', timeout: 3000 }).split('\n')[0].trim();
     if (gitPath) {
@@ -36,9 +39,9 @@ const GB = (() => {
   for (const p of candidates) if (p && existsSync(p)) return p.replace(/\//g, '\\');
   return join(pf, 'Git', 'bin', 'bash.exe');
 })();
-const RUNKEEP = join(HERE, 'run-keep.sh').replace(/\\/g, '/'); // C:/.../run-keep.sh
-const PROFILE = 'Layouts';   // perfil dedicado (Git Bash + suppressApplicationTitle)
-const HOME = (process.env.USERPROFILE || 'C:\\Users\\Default').replace(/\\/g, '/');
+const RUNKEEP = IS_MAC ? '' : join(HERE, 'run-keep.sh').replace(/\\/g, '/');
+const PROFILE = 'Layouts';
+const HOME = (process.env.HOME || process.env.USERPROFILE || '/tmp').replace(/\\/g, '/');
 const COLORS = { green:'#2ea043', magenta:'#c026d3', blue:'#2563eb', red:'#dc2626',
                  yellow:'#d4a72c', cyan:'#0891b2', orange:'#ea580c', purple:'#7c3aed' };
 // Paleta amplia para color = "random": color estable por NOMBRE del layout (mismo
@@ -105,10 +108,13 @@ function expandDir(d) {
 function shellOf(p) {
   let s = String(p.shell || process.env.LAY_SHELL || 'bash').toLowerCase();
   if (['git-bash','gitbash','sh','bash.exe'].includes(s)) s = 'bash';
+  else if (['zsh','zsh.exe'].includes(s)) s = 'zsh';
   else if (['pwsh.exe','powershell-core','ps7','core'].includes(s)) s = 'pwsh';
   else if (['ps','powershell.exe','windows-powershell','winps'].includes(s)) s = 'powershell';
   else if (['cmd.exe','bat','batch','command'].includes(s)) s = 'cmd';
-  if (!['bash','pwsh','powershell','cmd'].includes(s)) s = 'bash';
+  // macOS: cmd/powershell no existen, fallback a bash
+  if (IS_MAC && ['cmd','powershell'].includes(s)) s = 'bash';
+  if (!['bash','zsh','pwsh','powershell','cmd'].includes(s)) s = 'bash';
   return s;
 }
 function buildTree(panes) {
@@ -226,6 +232,92 @@ function renderBlock(node) {
   return out;
 }
 
+// ── AppleScript emission (macOS: iTerm2 / Terminal.app) ─────────────────────
+const qs = (s) => '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+
+function emitITermScript(tree, title, isTab) {
+  const L = [];
+  let vc = 0;
+  const nv = () => `s${++vc}`;
+
+  L.push('tell application "iTerm2"');
+  L.push('  activate');
+  if (!isTab) {
+    L.push('  create window with default profile');
+  } else {
+    L.push('  tell current window');
+    L.push('    create tab with default profile');
+    L.push('  end tell');
+  }
+  L.push('  tell current window');
+
+  const initVar = nv();
+  L.push(`    set ${initVar} to current session of current tab`);
+
+  function setupLeaf(sv, leaf) {
+    const dir = leaf.dir || '~';
+    const cmds = leaf.cmds || [];
+    const cmd = cmds.length ? `cd ${dir} && ${cmds.join(' && ')}` : `cd ${dir}`;
+    L.push(`    tell ${sv}`);
+    L.push(`      write text ${qs(cmd)}`);
+    L.push('    end tell');
+  }
+
+  function emitNode(node, sv) {
+    if (node.leaf) { setupLeaf(sv, node); return; }
+    // horizontal (Warp: columns) → iTerm: split vertically (divisor vertical)
+    // vertical (Warp: rows) → iTerm: split horizontally (divisor horizontal)
+    const dir = node.split === 'horizontal' ? 'vertically' : 'horizontally';
+    const kids = node.children;
+    const vars = [sv];
+    let last = sv;
+    for (let i = 1; i < kids.length; i++) {
+      const v = nv();
+      L.push(`    tell ${last}`);
+      L.push(`      set ${v} to (split ${dir} with default profile)`);
+      L.push('    end tell');
+      vars.push(v);
+      last = v;
+    }
+    for (let i = 0; i < kids.length; i++) emitNode(kids[i], vars[i]);
+  }
+
+  emitNode(tree, initVar);
+
+  L.push(`    tell current session of current tab`);
+  L.push(`      set name to ${qs(title)}`);
+  L.push('    end tell');
+  L.push('  end tell');
+  L.push('end tell');
+  return L.join('\n');
+}
+
+function emitTerminalScript(tree, title, isTab) {
+  // Terminal.app no soporta splits → cada leaf = un tab.
+  const L = [];
+  const leaves = [];
+  function collect(n) { if (n.leaf) leaves.push(n); else n.children.forEach(collect); }
+  collect(tree);
+
+  L.push('tell application "Terminal"');
+  L.push('  activate');
+  for (let i = 0; i < leaves.length; i++) {
+    const leaf = leaves[i];
+    const dir = leaf.dir || '~';
+    const cmds = leaf.cmds || [];
+    const cmd = cmds.length ? `cd ${dir} && ${cmds.join(' && ')}` : `cd ${dir}`;
+    if (i === 0 && !isTab) {
+      L.push(`  do script ${qs(cmd)}`);
+    } else {
+      L.push('  tell application "System Events" to tell process "Terminal" to keystroke "t" using command down');
+      L.push('  delay 0.3');
+      L.push(`  do script ${qs(cmd)} in front window`);
+    }
+  }
+  L.push('end tell');
+  return L.join('\n');
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 const file = process.argv[2];
 if (!file) { console.error('uso: node toml2wt.mjs <config.toml>'); process.exit(2); }
@@ -234,6 +326,16 @@ const tree = buildTree(panes);
 const f0 = firstLeaf(tree);
 LAYOUT_TITLE = top.title || top.name || 'tab';
 LAYOUT_COLOR = resolveColor(top.color, top.name || top.title || file);
+
+if (process.argv[3] === '--applescript') {
+  const target = process.argv[4] || 'iterm';
+  const isTab = process.argv.includes('--tab');
+  const script = target === 'terminal'
+    ? emitTerminalScript(tree, LAYOUT_TITLE, isTab)
+    : emitITermScript(tree, LAYOUT_TITLE, isTab);
+  process.stdout.write(script + '\n');
+  process.exit(0);
+}
 
 if (process.argv[3] === '--preview') {
   const rows = renderBlock(tree);

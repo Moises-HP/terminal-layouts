@@ -66,8 +66,12 @@ fi
 
 # Atajos (opcionales; open.sh funciona sin ellos):
 printf '#!/usr/bin/env bash\nexec bash "$(dirname "$0")/open.sh" %s\n' "$name" > "$HERE/$name.sh"
-printf '@echo off\r\n"%%~dp0_run.cmd" %s\r\n' "$name" > "$HERE/$name.cmd"
-echo "✅ Atajos listos: $name.sh  y  $name.cmd (doble clic)."
+if [ "$(uname -s)" != "Darwin" ]; then
+  printf '@echo off\r\n"%%~dp0_run.cmd" %s\r\n' "$name" > "$HERE/$name.cmd"
+  echo "✅ Atajos listos: $name.sh  y  $name.cmd (doble clic)."
+else
+  echo "✅ Atajo listo: $name.sh"
+fi
 echo
 echo "Siguiente:"
 echo "   1) edita  configs/$name.toml"

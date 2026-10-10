@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # lay.sh — comando único para todo el sistema de layouts, usable desde CUALQUIER
 # carpeta (vía la función 'lay' de ai-aliases.sh, o con ruta completa).
-HERE="$(cd "$(dirname "$0")" && pwd -W)"   # ruta Windows (C:/...) para que node la lea bien
+. "$(cd "$(dirname "$0")" && pwd)/platform.sh"
+HERE="$(_lay_here)"
 CFG="$HERE/configs"
 
 # upsert de una clave en .layconfig (preferencias locales: LAY_BLOCKS, LAY_SHELL…)
@@ -74,8 +75,15 @@ case "$sub" in
   export)         shift; exec bash "$HERE/backup.sh" export "$@" ;;
   import)         shift; exec bash "$HERE/backup.sh" import "$@" ;;
   bundle)         shift; exec bash "$HERE/backup.sh" bundle "$@" ;;   # empaquetar para compañeros
-  pin)            shift; exec bash "$HERE/pin.sh" "$@" ;;   # acceso en Inicio (para anclar)
-  setup)          exec node "$HERE/wt-setup.mjs" ;;   # (re)configurar Windows Terminal
+  pin)            shift
+    if [ "$(_lay_os)" = "darwin" ]; then exec bash "$HERE/pin-mac.sh" "$@"
+    else exec bash "$HERE/pin.sh" "$@"; fi ;;   # accesos directos
+  setup)
+    if [ "$(_lay_os)" = "darwin" ]; then
+      echo "macOS: no requiere configuracion extra (iTerm2/Terminal.app funcionan directo)."
+    else
+      exec node "$HERE/wt-setup.mjs"
+    fi ;;
   cheat)          exec bash "$HERE/cheatsheet.sh" ;;
   img|image)      exec bash "$HERE/clip-img.sh" ;;   # portapapeles → @ruta para la IA
   doctor|check)   shift; exec bash "$HERE/doctor.sh" "$@" ;;   # acepta --fix
@@ -117,7 +125,12 @@ case "$sub" in
         echo "Cambiar el default:  lay shell bash | pwsh | powershell | cmd" ;;
       *) echo "uso: lay shell bash | pwsh | powershell | cmd" ;;
     esac ;;
-  term|terminal)  export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash" ;;
+  term|terminal)
+    if [ "$(_lay_os)" = "darwin" ]; then
+      open -a iTerm 2>/dev/null || open -a Terminal
+    else
+      export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash"
+    fi ;;
   all)            exec bash "$HERE/open.sh" ;;
   last)           [ -f "$HERE/.last" ] || { echo "Aún no hay 'último'. Abre algo primero."; exit 1; }
                   exec bash "$HERE/open.sh" $(cat "$HERE/.last") ;;
@@ -157,6 +170,7 @@ case "$sub" in
     if [ -f "$CFG/$1.toml" ]; then
       toml="$CFG/$1.toml"
       if command -v code >/dev/null 2>&1; then code "$toml"
+      elif [ "$(_lay_os)" = "darwin" ]; then open "$toml"
       else notepad "$(cygpath -w "$toml" 2>/dev/null || echo "$toml")" & fi
       echo "✏️  abriendo configs/$1.toml…"
     elif [ -f "$HERE/combo-$c.sh" ]; then

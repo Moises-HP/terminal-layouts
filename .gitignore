@@ -43,3 +43,7 @@ configs/*.toml
 !_run.cmd
 !example-*.sh
 !example-*.cmd
+!platform.sh
+!open-mac.sh
+!pin-mac.sh
+*.command

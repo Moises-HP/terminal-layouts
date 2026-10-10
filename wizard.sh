@@ -58,7 +58,7 @@ done
 } > "$CFG/$name.toml"
 
 printf '#!/usr/bin/env bash\nexec bash "$(dirname "$0")/open.sh" %s\n' "$name" > "$HERE/$name.sh"
-printf '@echo off\r\n"%%~dp0_run.cmd" %s\r\n' "$name" > "$HERE/$name.cmd"
+[ "$(uname -s)" != "Darwin" ] && printf '@echo off\r\n"%%~dp0_run.cmd" %s\r\n' "$name" > "$HERE/$name.cmd"
 
 echo "" >&2
 echo "✅ configs/$name.toml (${cols}x${rows}) + $name.sh / $name.cmd" >&2

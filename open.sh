@@ -8,10 +8,11 @@
 #
 # Requiere: node, wt.exe, Git Bash. Los .toml se convierten con toml2wt.mjs.
 set -euo pipefail
-export MSYS_NO_PATHCONV=1
-# pwd -W => ruta Windows nativa (C:/...), que node y wt.exe entienden.
-# (pwd normal da /c/... y node lo resuelve mal como C:\c\...)
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -W)"
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/platform.sh"
+if [ "$(_lay_os)" = "windows" ]; then
+  export MSYS_NO_PATHCONV=1
+fi
+HERE="$(_lay_here)"
 CFG="$HERE/configs"
 # default global de shell para los paneles (LAY_SHELL), configurable con 'lay shell'.
 [ -f "$HERE/.layconfig" ] && . "$HERE/.layconfig" || true
@@ -57,6 +58,12 @@ names=("${exp[@]}")
 # recordar lo último abierto (para 'lay last')
 [ ${#names[@]} -gt 0 ] && printf '%s\n' "${names[*]}" > "$HERE/.last" 2>/dev/null || true
 
+# ── macOS: delegar a open-mac.sh ─────────────────────────────────────────────
+if [ "$(_lay_os)" = "darwin" ]; then
+  exec bash "$HERE/open-mac.sh" "${names[@]}"
+fi
+
+# ── Windows: construir argumentos para wt.exe ───────────────────────────────
 A=(); firstlayout=1
 for n in "${names[@]}"; do
   toml="$CFG/$n.toml"

@@ -32,7 +32,9 @@ read -r line
 
 # 'all' → todos ; 't'/'term' → terminal normal
 for tok in $line; do [ "$tok" = "all" ] && exec bash "$HERE/open.sh"; done
-for tok in $line; do case "$tok" in t|term|terminal) export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash";; esac; done
+for tok in $line; do case "$tok" in t|term|terminal)
+  if [ "$(uname -s)" = "Darwin" ]; then open -a iTerm 2>/dev/null || open -a Terminal
+  else export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash"; fi;; esac; done
 
 sel=()
 for tok in $line; do
