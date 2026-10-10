@@ -30,6 +30,7 @@ color = "green"          # green|magenta|blue|red|yellow|cyan|orange|purple o #h
 id = "main"
 type = "terminal"
 directory = "~"
+
 # commands = ["bun i", "bun run dev"]   # se unen con &&; el panel queda abierto
 shell = "bash"
 
@@ -51,6 +52,7 @@ shell = "bash"
 # [[panes]]
 # id = "a"
 # directory = "~/proyectos/proyecto-a"
+
 # commands = ["npm run dev"]
 #
 # [[panes]]
@@ -60,6 +62,32 @@ shell = "bash"
 # [[panes]]
 # id = "c"
 # directory = "~/proyectos/proyecto-c"
+#
+# commands = ["npm run dev"]
+#
+# [[panes]]
+# id = "d"
+# directory = "~/proyectos/proyecto-d"
+#
+# [[panes]]
+# id = "e"
+# directory = "~/proyectos/proyecto-e"
+#
+# [[panes]]
+# id = "f"
+# directory = "~/proyectos/proyecto-f"
+#
+# [[panes]]
+# id = "g"
+# directory = "~/proyectos/proyecto-g"
+#
+# [[panes]]
+# id = "h"
+# directory = "~/proyectos/proyecto-h"
+TPL
+  echo "✅ Creado configs/$name.toml (plantilla — edítalo)."
+fi
+
 TPL
   echo "✅ Creado configs/$name.toml (plantilla — edítalo)."
 fi
