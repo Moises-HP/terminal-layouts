@@ -65,8 +65,8 @@ TPL
 fi
 
 # Atajos (opcionales; open.sh funciona sin ellos):
-printf '#!/usr/bin/env bash\nexec sh "$(dirname "$0")/open.sh" %s\n' "$name" > "$HERE/$name.sh"
-printf '@echo off\r\n"C:\\Program Files\\Git\\bin\\bash.exe" -l "%%~dp0open.sh" %s\r\n' "$name" > "$HERE/$name.cmd"
+printf '#!/usr/bin/env bash\nexec bash "$(dirname "$0")/open.sh" %s\n' "$name" > "$HERE/$name.sh"
+printf '@echo off\r\n"%%~dp0_run.cmd" %s\r\n' "$name" > "$HERE/$name.cmd"
 echo "✅ Atajos listos: $name.sh  y  $name.cmd (doble clic)."
 echo
 echo "Siguiente:"

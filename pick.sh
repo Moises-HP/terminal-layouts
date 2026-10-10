@@ -31,7 +31,7 @@ read -r line
 [ -n "$(printf '%s' "$line" | tr -d ' ')" ] || { echo "Cancelado."; exit 0; }
 
 # 'all' → todos ; 't'/'term' → terminal normal
-for tok in $line; do [ "$tok" = "all" ] && exec sh "$HERE/open.sh"; done
+for tok in $line; do [ "$tok" = "all" ] && exec bash "$HERE/open.sh"; done
 for tok in $line; do case "$tok" in t|term|terminal) export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash";; esac; done
 
 sel=()
@@ -50,4 +50,4 @@ done
 
 [ "${#sel[@]}" -gt 0 ] || { echo "Nada válido seleccionado."; exit 1; }
 echo "Abriendo: ${sel[*]}"
-exec sh "$HERE/open.sh" "${sel[@]}"
+exec bash "$HERE/open.sh" "${sel[@]}"

@@ -41,5 +41,5 @@ cells=("$@")
   done
 } > "$CFG/$name.toml"
 
-sh "$HERE/new.sh" "$name" >/dev/null
+bash "$HERE/new.sh" "$name" >/dev/null
 echo "✅ configs/$name.toml (${cols}x${rows}) + atajos.   Ver: lay preview $name"

@@ -17,7 +17,7 @@ case "$mode" in
   import)
     src="${2:-}"; [ -f "$src" ] || { echo "uso: sh backup.sh import <archivo.tgz>"; exit 1; }
     tar -xzf "$src" -C "$HERE"
-    for f in "$CFG"/*.toml; do [ -e "$f" ] && sh "$HERE/new.sh" "$(basename "$f" .toml)" >/dev/null; done
+    for f in "$CFG"/*.toml; do [ -e "$f" ] && bash "$HERE/new.sh" "$(basename "$f" .toml)" >/dev/null; done
     echo "✅ configs restaurados + atajos regenerados.  Revisa con: sh doctor.sh" ;;
   bundle)
     # Empaqueta TODA la carpeta (scripts + configs) para dárselo a un compañero.

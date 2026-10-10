@@ -43,7 +43,7 @@ while true; do
   case "$act" in
     ok|save|s|guardar)
       [ "${#items[@]}" -ge 1 ] || { echo "${Rd}El combo no puede quedar vacío.${R}"; continue; }
-      sh "$HERE/savecombo.sh" "$name" "${items[@]}" >/dev/null
+      bash "$HERE/savecombo.sh" "$name" "${items[@]}" >/dev/null
       echo "${G}✅ combo '$name' guardado → ${items[*]}${R}"; exit 0 ;;
     q|cancel|cancelar) echo "Cancelado (sin cambios)."; exit 0 ;;
     r|'') render ;;

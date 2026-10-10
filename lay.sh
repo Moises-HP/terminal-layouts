@@ -66,20 +66,20 @@ exists()    { [ -f "$CFG/$1.toml" ] || { echo "⛔ no existe el layout: $1  (lay
 sub="${1:-}"
 case "$sub" in
   -h|--help|help) help ;;
-  ''|menu|pick)   exec sh "$HERE/pick.sh" ;;
-  add)            shift; exec sh "$HERE/add.sh" "$@" ;;
-  new)            shift; exec sh "$HERE/new.sh" "$@" ;;
-  wiz|wizard)     exec sh "$HERE/wizard.sh" ;;
-  combo|save)     shift; exec sh "$HERE/savecombo.sh" "$@" ;;
-  export)         shift; exec sh "$HERE/backup.sh" export "$@" ;;
-  import)         shift; exec sh "$HERE/backup.sh" import "$@" ;;
-  bundle)         shift; exec sh "$HERE/backup.sh" bundle "$@" ;;   # empaquetar para compañeros
-  pin)            shift; exec sh "$HERE/pin.sh" "$@" ;;   # acceso en Inicio (para anclar)
+  ''|menu|pick)   exec bash "$HERE/pick.sh" ;;
+  add)            shift; exec bash "$HERE/open.sh" -w last "$@" ;;
+  new)            shift; exec bash "$HERE/new.sh" "$@" ;;
+  wiz|wizard)     exec bash "$HERE/wizard.sh" ;;
+  combo|save)     shift; exec bash "$HERE/savecombo.sh" "$@" ;;
+  export)         shift; exec bash "$HERE/backup.sh" export "$@" ;;
+  import)         shift; exec bash "$HERE/backup.sh" import "$@" ;;
+  bundle)         shift; exec bash "$HERE/backup.sh" bundle "$@" ;;   # empaquetar para compañeros
+  pin)            shift; exec bash "$HERE/pin.sh" "$@" ;;   # acceso en Inicio (para anclar)
   setup)          exec node "$HERE/wt-setup.mjs" ;;   # (re)configurar Windows Terminal
-  cheat)          exec sh "$HERE/cheatsheet.sh" ;;
-  img|image)      exec sh "$HERE/clip-img.sh" ;;   # portapapeles → @ruta para la IA
-  doctor|check)   shift; exec sh "$HERE/doctor.sh" "$@" ;;   # acepta --fix
-  grid)           shift; exec sh "$HERE/grid.sh" "$@" ;;
+  cheat)          exec bash "$HERE/cheatsheet.sh" ;;
+  img|image)      exec bash "$HERE/clip-img.sh" ;;   # portapapeles → @ruta para la IA
+  doctor|check)   shift; exec bash "$HERE/doctor.sh" "$@" ;;   # acepta --fix
+  grid)           shift; exec bash "$HERE/grid.sh" "$@" ;;
   blocks|ui)
     shift; cfg="$HERE/.layconfig"
     case "${1:-show}" in
@@ -118,9 +118,9 @@ case "$sub" in
       *) echo "uso: lay shell bash | pwsh | powershell | cmd" ;;
     esac ;;
   term|terminal)  export MSYS_NO_PATHCONV=1; exec wt.exe -p "Git Bash" ;;
-  all)            exec sh "$HERE/open.sh" ;;
+  all)            exec bash "$HERE/open.sh" ;;
   last)           [ -f "$HERE/.last" ] || { echo "Aún no hay 'último'. Abre algo primero."; exit 1; }
-                  exec sh "$HERE/open.sh" $(cat "$HERE/.last") ;;
+                  exec bash "$HERE/open.sh" $(cat "$HERE/.last") ;;
   ls|list)
     if [ "${2:-}" = "-l" ] || [ "${2:-}" = "--long" ]; then
       printf "%-27s %-8s %-7s %s\n" "LAYOUT" "COLOR" "PANELES" "1ª CARPETA"
@@ -149,7 +149,7 @@ case "$sub" in
     shift; need_name "${1:-}"; [ -n "${2:-}" ] || { echo "uso: lay dup <origen> <nuevo>"; exit 1; }
     exists "$1"; [ -e "$CFG/$2.toml" ] && { echo "⛔ ya existe: $2"; exit 1; }
     sed -e "s/^name *=.*/name = \"$2\"/" -e "s/^title *=.*/title = \"$2\"/" "$CFG/$1.toml" > "$CFG/$2.toml"
-    sh "$HERE/new.sh" "$2" >/dev/null
+    bash "$HERE/new.sh" "$2" >/dev/null
     echo "📄 '$1' → '$2' (copiado + atajos). Ajusta el título con: lay edit $2" ;;
 
   edit)
@@ -160,7 +160,7 @@ case "$sub" in
       else notepad "$(cygpath -w "$toml" 2>/dev/null || echo "$toml")" & fi
       echo "✏️  abriendo configs/$1.toml…"
     elif [ -f "$HERE/combo-$c.sh" ]; then
-      exec sh "$HERE/editcombo.sh" "$c"
+      exec bash "$HERE/editcombo.sh" "$c"
     else echo "⛔ no existe layout ni combo: $1  (lay ls)"; exit 1; fi ;;
 
   rename|mv)
@@ -169,7 +169,7 @@ case "$sub" in
     mv "$CFG/$1.toml" "$CFG/$2.toml"
     sed -i -e "s/^name *=.*/name = \"$2\"/" "$CFG/$2.toml"
     rm -f "$HERE/$1.sh" "$HERE/$1.cmd"
-    sh "$HERE/new.sh" "$2" >/dev/null
+    bash "$HERE/new.sh" "$2" >/dev/null
     echo "🔁 '$1' → '$2' (renombrado + atajos). Ajusta el 'title' con: lay edit $2" ;;
 
   rm|remove|del)
@@ -182,5 +182,5 @@ case "$sub" in
       case "$ans" in y|Y|s|S) rm -f "$HERE/combo-$c.sh" "$HERE/combo-$c.cmd"; echo "🗑️  combo '$c' eliminado." ;; *) echo "Cancelado." ;; esac
     else echo "⛔ no existe layout ni combo: $1  (lay ls)"; exit 1; fi ;;
 
-  *)  exec sh "$HERE/open.sh" "$@" ;;   # uno o varios nombres → abrir
+  *)  exec bash "$HERE/open.sh" "$@" ;;   # uno o varios nombres → abrir
 esac

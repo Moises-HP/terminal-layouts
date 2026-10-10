@@ -26,8 +26,29 @@ const changes = [];
 j.profiles = j.profiles || {};
 j.profiles.list = j.profiles.list || [];
 const list = j.profiles.list;
-const CMD = '"C:\\Program Files\\Git\\bin\\bash.exe" -i -l';
-const ICON = 'C:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico';
+// Detectar ruta de Git dinámicamente
+import { execSync } from 'node:child_process';
+import { dirname, join } from 'node:path';
+const GIT_DIR = (() => {
+  try {
+    const gitPath = execSync('where git', { encoding: 'utf8', timeout: 3000 }).split('\n')[0].trim();
+    if (gitPath) {
+      let d = dirname(gitPath);
+      for (let i = 0; i < 4; i++) {
+        if (fs.existsSync(join(d, 'bin', 'bash.exe'))) return d;
+        d = dirname(d);
+      }
+    }
+  } catch {}
+  const pf = process.env.ProgramFiles || 'C:\\Program Files';
+  const pf86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
+  const local = process.env.LOCALAPPDATA || '';
+  for (const d of [pf + '\\Git', pf86 + '\\Git', local + '\\Programs\\Git'])
+    if (fs.existsSync(join(d, 'bin', 'bash.exe'))) return d;
+  return pf + '\\Git';
+})();
+const CMD = `"${join(GIT_DIR, 'bin', 'bash.exe').replace(/\//g, '\\')}" -i -l`;
+const ICON = join(GIT_DIR, 'mingw64', 'share', 'git', 'git-for-windows.ico').replace(/\//g, '\\');
 const GITBASH = { guid: '{2ece5bfe-50ed-5f3a-ab87-5cd4baafed2b}', name: 'Git Bash', commandline: CMD, startingDirectory: '%USERPROFILE%', icon: ICON, hidden: false };
 const LAYOUTS = { guid: '{7d3e9f2a-4b6c-5d8e-a1f0-3c9b2e7d5a10}', name: 'Layouts', commandline: CMD, startingDirectory: '%USERPROFILE%', icon: ICON, suppressApplicationTitle: true, hidden: true };
 for (const p of [GITBASH, LAYOUTS]) {

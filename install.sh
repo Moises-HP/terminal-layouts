@@ -32,7 +32,7 @@ else
 fi
 
 echo "▶ 3/3 Regenerando atajos de layouts…"
-sh "$HERE/doctor.sh" --fix >/dev/null && echo "✓ atajos listos"
+bash "$HERE/doctor.sh" --fix >/dev/null && echo "✓ atajos listos"
 
 echo
 echo "🎉 Listo. Abre una terminal NUEVA (o corre: source ~/.bashrc) y prueba:  lay -h"

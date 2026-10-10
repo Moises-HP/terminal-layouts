@@ -14,10 +14,11 @@ set -uo pipefail
 export MSYS_NO_PATHCONV=1
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CFG="$HERE/configs"
-export LAY_ICON='C:\Program Files\Git\mingw64\share\git\git-for-windows.ico'
+GIT_ROOT="$(cd / && pwd -W)"
+export LAY_ICON="$GIT_ROOT\\mingw64\\share\\git\\git-for-windows.ico"
 export LAY_START="$(cygpath -w "$APPDATA")\\Microsoft\\Windows\\Start Menu\\Programs\\Terminal Layouts"
 export LAY_DIR="$(cygpath -w "$HERE")"
-export LAY_BASH='C:\Program Files\Git\bin\bash.exe'
+export LAY_BASH="$GIT_ROOT\\bin\\bash.exe"
 PS1FILE="$(cygpath -w "$HERE/_mklink.ps1")"
 OPEN_WIN="$(cygpath -m "$HERE/open.sh")"
 

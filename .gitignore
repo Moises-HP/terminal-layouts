@@ -40,3 +40,6 @@ configs/*.toml
 !all.sh
 !install.cmd
 !all.cmd
+!_run.cmd
+!example-*.sh
+!example-*.cmd

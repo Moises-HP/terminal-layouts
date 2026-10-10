@@ -16,7 +16,7 @@ alias cx='codex'
 alias gm='gemini'
 alias qw='qwen'
 # imagen del portapapeles → @ruta para pegar en la IA (Alt+Shift captura, luego 'img')
-alias img='sh "$LAYOUTS_DIR/clip-img.sh"'
+alias img='bash "$LAYOUTS_DIR/clip-img.sh"'
 
 # ── Terminal Layouts: un solo comando 'lay' con subcomandos ─────────────────
 #   lay            menú          lay <a> <b>    abrir esos (nueva ventana)
@@ -25,7 +25,7 @@ alias img='sh "$LAYOUTS_DIR/clip-img.sh"'
 #   lay combo ...  guardar combo lay cheat      cheatsheet     lay ls  listar
 # Se auto-localiza: funciona esté donde esté la carpeta (útil para compañeros).
 LAYOUTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-lay() { sh "$LAYOUTS_DIR/lay.sh" "$@"; }
+lay() { bash "$LAYOUTS_DIR/lay.sh" "$@"; }
 
 # Autocompletado con Tab: 'lay <TAB>' → subcomandos + layouts ; 'lay add <TAB>' → layouts
 _lay_complete() {

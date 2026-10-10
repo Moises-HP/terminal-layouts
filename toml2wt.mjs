@@ -14,7 +14,28 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const GB = 'C:\\Program Files\\Git\\bin\\bash.exe';        // shell de cada panel
+// Detectar bash.exe de Git: derivar de PATH + ubicaciones comunes.
+import { execSync } from 'node:child_process';
+const GB = (() => {
+  const candidates = [process.env.GIT_BASH_EXE];
+  // Derivar desde git.exe en PATH: subir directorios hasta encontrar bin/bash.exe
+  try {
+    const gitPath = execSync('where git', { encoding: 'utf8', timeout: 3000 }).split('\n')[0].trim();
+    if (gitPath) {
+      let d = dirname(gitPath);
+      for (let i = 0; i < 4; i++) { candidates.push(join(d, 'bin', 'bash.exe')); d = dirname(d); }
+    }
+  } catch {}
+  const pf = process.env.ProgramFiles || 'C:\\Program Files';
+  const pf86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
+  const local = process.env.LOCALAPPDATA || '';
+  for (const base of [pf + '\\Git', pf86 + '\\Git', local + '\\Programs\\Git',
+                       ...(process.env.GIT_INSTALL_ROOT ? [process.env.GIT_INSTALL_ROOT] : [])]) {
+    candidates.push(join(base, 'bin', 'bash.exe'));
+  }
+  for (const p of candidates) if (p && existsSync(p)) return p.replace(/\//g, '\\');
+  return join(pf, 'Git', 'bin', 'bash.exe');
+})();
 const RUNKEEP = join(HERE, 'run-keep.sh').replace(/\\/g, '/'); // C:/.../run-keep.sh
 const PROFILE = 'Layouts';   // perfil dedicado (Git Bash + suppressApplicationTitle)
 const HOME = (process.env.USERPROFILE || 'C:\\Users\\Default').replace(/\\/g, '/');

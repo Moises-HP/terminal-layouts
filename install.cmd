@@ -7,9 +7,19 @@ echo  == Instalador de terminal-layouts ==
 echo.
 
 REM --- localizar Git Bash ---
-set "GITBASH=%ProgramFiles%\Git\bin\bash.exe"
-if not exist "%GITBASH%" set "GITBASH=%ProgramFiles(x86)%\Git\bin\bash.exe"
-if not exist "%GITBASH%" set "GITBASH=%LocalAppData%\Programs\Git\bin\bash.exe"
+set "GITBASH="
+for %%D in ("%ProgramFiles%\Git" "%ProgramFiles(x86)%\Git" "%LocalAppData%\Programs\Git") do (
+  if exist "%%~D\bin\bash.exe" if not defined GITBASH set "GITBASH=%%~D\bin\bash.exe"
+)
+REM Derivar desde git.exe en PATH (instalaciones no estandar)
+if not defined GITBASH (
+  for /f "delims=" %%G in ('where git.exe 2^>nul') do (
+    set "_GD=%%~dpG"
+    if exist "!_GD!..\bin\bash.exe" if not defined GITBASH set "GITBASH=!_GD!..\bin\bash.exe"
+    if exist "!_GD!..\..\bin\bash.exe" if not defined GITBASH set "GITBASH=!_GD!..\..\bin\bash.exe"
+    if exist "!_GD!..\..\..\bin\bash.exe" if not defined GITBASH set "GITBASH=!_GD!..\..\..\bin\bash.exe"
+  )
+)
 
 REM --- ¿faltan cosas? intentar instalarlas con winget ---
 where winget >nul 2>&1
@@ -19,14 +29,15 @@ if %errorlevel%==0 (
   set "WINGET=0"
 )
 
-if not exist "%GITBASH%" (
+if not defined GITBASH (
   echo  [*] Git para Windows no esta instalado.
   if "!WINGET!"=="1" (
     echo      Instalando Git con winget...
     winget install --id Git.Git -e --source winget --accept-source-agreements --accept-package-agreements
     REM re-localizar tras instalar
-    set "GITBASH=%ProgramFiles%\Git\bin\bash.exe"
-    if not exist "!GITBASH!" set "GITBASH=%LocalAppData%\Programs\Git\bin\bash.exe"
+    for %%D in ("%ProgramFiles%\Git" "%LocalAppData%\Programs\Git") do (
+      if exist "%%~D\bin\bash.exe" if not defined GITBASH set "GITBASH=%%~D\bin\bash.exe"
+    )
   ) else (
     echo      No tienes winget. Instala Git manualmente: https://git-scm.com/download/win
   )
@@ -56,7 +67,7 @@ if not %errorlevel%==0 (
 )
 
 echo.
-if not exist "%GITBASH%" (
+if not defined GITBASH (
   echo  [X] Aun no encuentro Git Bash. Si acabas de instalarlo, CIERRA esta ventana y
   echo      vuelve a hacer doble clic en install.cmd ^(a veces requiere reabrir^).
   echo      Descarga manual: https://git-scm.com/download/win

@@ -15,7 +15,7 @@ for f in "$CFG"/*.toml; do
   [ -e "$f" ] || continue
   n="$(basename "$f" .toml)"; total=$((total+1))
   if [ "$FIX" = 1 ] && { [ ! -f "$HERE/$n.sh" ] || [ ! -f "$HERE/$n.cmd" ]; }; then
-    sh "$HERE/new.sh" "$n" >/dev/null 2>&1
+    bash "$HERE/new.sh" "$n" >/dev/null 2>&1
   fi
   errf="$(mktemp)"
   out="$(node "$HERE/toml2wt.mjs" "$f" 2>"$errf")"
