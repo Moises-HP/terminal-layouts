@@ -6,4 +6,3 @@
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [ "$#" -gt 0 ] && [ -n "$1" ] && export LAY_RUN="$*"
 exec bash --rcfile "$HERE/run-keep-rc.sh" -i
-

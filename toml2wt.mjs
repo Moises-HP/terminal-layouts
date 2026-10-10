@@ -12,7 +12,6 @@
 //   split="horizontal"  => columnas (izq | der)  => wt -V / iTerm split vertically
 //   split="vertical"    => filas (arriba/abajo)  => wt -H / iTerm split horizontally
 import { readFileSync, existsSync } from 'node:fs';
-
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -57,7 +56,6 @@ function resolveColor(raw, name) {
   return COLORS[s] || (String(raw || '').startsWith('#') ? String(raw).trim() : '');
 }
 
-
 // ── Parser TOML (subset Warp: top-level key=val + arrays [[panes]]) ───────────
 function parseValue(raw) {
   raw = raw.trim();
@@ -101,7 +99,6 @@ function parseToml(text) {
 
 // ── Construir el árbol a partir de ids/children ──────────────────────────────
 const MISSING = [];   // carpetas que no existen (se avisan por stderr, no falla)
-
 function expandDir(d) {
   if (!d) return HOME;
   return d.startsWith('~') ? HOME + d.slice(1) : d;
@@ -120,7 +117,6 @@ function shellOf(p) {
   if (!['bash','zsh','pwsh','powershell','cmd'].includes(s)) s = 'bash';
   return s;
 }
-
 function buildTree(panes) {
   const byId = new Map(panes.map(p => [p.id, p]));
   const childIds = new Set();
@@ -129,10 +125,9 @@ function buildTree(panes) {
   const toNode = (p) => {
     const kids = (p.children || []).map(id => byId.get(id)).filter(Boolean);
     if (kids.length) return { split: p.split || 'vertical', children: kids.map(toNode) };
-const dir = expandDir(p.directory);
-if (dir && !existsSync(dir)) MISSING.push(dir);   // aviso: carpeta inexistente
-return { leaf: true, dir, cmds: p.commands || [], shell: shellOf(p) };
-
+    const dir = expandDir(p.directory);
+    if (dir && !existsSync(dir)) MISSING.push(dir);   // aviso: carpeta inexistente
+    return { leaf: true, dir, cmds: p.commands || [], shell: shellOf(p) };
   };
 
   // raíz = pane no referenciado como hijo; si hay varios, el que tenga children
@@ -148,7 +143,6 @@ function firstLeaf(n) { return n.leaf ? n : firstLeaf(n.children[0]); }
 const A = [];
 let LAYOUT_TITLE = 'tab';                    // título fijo del layout (todas las panes)
 let LAYOUT_COLOR = '';                       // color del tab (se pone en CADA panel)
-
 const push = (...xs) => { for (const x of xs) A.push(String(x)); };
 const size = (num, den) => (num / den).toFixed(3);
 
@@ -180,7 +174,6 @@ function createLeaf(leaf) {                 // args comunes de creación de un p
       if (cmds.length) push(GB, '-l', RUNKEEP, cmds.join(' && '));
       // sin comando: hereda el commandline del perfil (Git Bash)
   }
-
 }
 
 // emit(node): asume que el panel enfocado es firstLeaf(node) ocupando toda la
